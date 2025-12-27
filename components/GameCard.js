@@ -37,66 +37,40 @@ export default function GameCard({ game, onEdit }) {
 
       {/* Stats */}
       <View style={styles.statsContainer}>
-        <StatRow label="Points" value={game.boxScore.points} />
-        <StatRow label="Rebounds" value={game.boxScore.rebounds} />
-        <StatRow label="Assists" value={game.boxScore.assists} />
-        <StatRow label="Blocks" value={game.boxScore.blocks} />
-        <StatRow label="Fouls" value={game.boxScore.fouls} />
-        <StatRow label="Steals" value={game.boxScore.steals} />
-        <StatRow label="Turnovers" value={game.boxScore.turnovers} />
-        
-        {/* Shooting Stats */}
-        <ShootingRow 
-          label="2-Pointers"
-          made={game.boxScore.twoPointMade}
-          attempts={game.boxScore.twoPointAttempts}
-          percentage={game.boxScore.twoPointPercentage}
-        />
-        <ShootingRow 
-          label="3-Pointers"
-          made={game.boxScore.threePointMade}
-          attempts={game.boxScore.threePointAttempts}
-          percentage={game.boxScore.threePointPercentage}
-        />
-        <ShootingRow 
-          label="Free Throws"
-          made={game.boxScore.freeThrowMade}
-          attempts={game.boxScore.freeThrowAttempts}
-          percentage={game.boxScore.freeThrowPercentage}
-        />
+        {/* All Stats */}
+        <View style={styles.statsGrid}>
+          <StatItem label="Points" value={game.boxScore.points} />
+          <StatItem label="Rebounds" value={game.boxScore.rebounds} />
+          <StatItem label="Assists" value={game.boxScore.assists} />
+          <StatItem label="Blocks" value={game.boxScore.blocks} />
+          <StatItem label="Fouls" value={game.boxScore.fouls} />
+          <StatItem label="Steals" value={game.boxScore.steals} />
+          <StatItem label="Turnovers" value={game.boxScore.turnovers} />
+          
+          <StatItem 
+            label="2-Pointers"
+            value={`${game.boxScore.twoPointMade}/${game.boxScore.twoPointAttempts}${!isNaN(game.boxScore.twoPointPercentage) ? ` (${Math.round(game.boxScore.twoPointPercentage)}%)` : ''}`}
+          />
+          <StatItem 
+            label="3-Pointers"
+            value={`${game.boxScore.threePointMade}/${game.boxScore.threePointAttempts}${!isNaN(game.boxScore.threePointPercentage) ? ` (${Math.round(game.boxScore.threePointPercentage)}%)` : ''}`}
+          />
+          <StatItem 
+            label="Free Throws"
+            value={`${game.boxScore.freeThrowMade}/${game.boxScore.freeThrowAttempts}${!isNaN(game.boxScore.freeThrowPercentage) ? ` (${Math.round(game.boxScore.freeThrowPercentage)}%)` : ''}`}
+          />
+        </View>
       </View>
     </View>
   );
 }
 
-// Simple stat row component
-function StatRow({ label, value }) {
+// Compact stat item for grid layout
+function StatItem({ label, value }) {
   return (
-    <View style={styles.statRow}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-    </View>
-  );
-}
-
-// Shooting stat row component with made/attempts/percentage
-function ShootingRow({ label, made, attempts, percentage }) {
-  const formatPercentage = (value) => {
-    if (value === 'n/a' || value === null || value === undefined) return 'n/a';
-    // Handle if value is already a string percentage
-    if (typeof value === 'string') {
-      return value.includes('%') ? value : `${value}%`;
-    }
-    // Handle if value is a number
-    return `${value.toFixed(1)}%`;
-  };
-
-  return (
-    <View style={styles.statRow}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>
-        {made}/{attempts} ({formatPercentage(percentage)})
-      </Text>
+    <View style={styles.statItem}>
+      <Text style={styles.statItemLabel}>{label}</Text>
+      <Text style={styles.statItemValue}> {value}</Text>
     </View>
   );
 }
@@ -150,24 +124,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   statsContainer: {
-    padding: 16,
+    padding: 12,
   },
-  statRow: {
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  statLabel: {
-    fontSize: 15,
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  statItemLabel: {
+    fontSize: 10,
     color: Colors.textSecondary,
     fontWeight: '500',
   },
-  statValue: {
-    fontSize: 15,
+  statItemValue: {
+    fontSize: 12,
     color: Colors.textPrimary,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });
