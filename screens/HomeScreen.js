@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import PlayerCard from '../components/PlayerCard';
-import { getAllGames } from '../services/database';
+import { getAllGames, deleteGame } from '../services/database';
 import Colors from '../constants/Colors';
 
 export default function HomeScreen({ navigation, route }) {
   // Track which player is currently expanded (only one at a time)
   const [expandedPlayer, setExpandedPlayer] = useState(null);
+  const [shouldScrollToPlayer, setShouldScrollToPlayer] = useState(false);
   const flatListRef = useRef(null);
   const [games, setGames] = useState([]);
 
@@ -39,6 +40,7 @@ export default function HomeScreen({ navigation, route }) {
       if (route.params?.expandPlayer) {
         const playerToExpand = route.params.expandPlayer;
         setExpandedPlayer(playerToExpand);
+        setShouldScrollToPlayer(true);
         
         // Clear the param so it doesn't trigger again
         navigation.setParams({ expandPlayer: undefined });
@@ -75,7 +77,7 @@ export default function HomeScreen({ navigation, route }) {
 
   // Scroll to expanded player when data loads (only after adding a game)
   useEffect(() => {
-    if (expandedPlayer && playerData.length > 0) {
+    if (shouldScrollToPlayer && expandedPlayer && playerData.length > 0) {
       const playerIndex = playerData.findIndex(p => p.player === expandedPlayer);
       if (playerIndex !== -1) {
         setTimeout(() => {
@@ -86,13 +88,25 @@ export default function HomeScreen({ navigation, route }) {
           });
         }, 400);
       }
+      setShouldScrollToPlayer(false);
     }
-  }, [expandedPlayer, playerData]);
+  }, [shouldScrollToPlayer, expandedPlayer, playerData]);
 
   const handleTogglePlayer = (playerName, index) => {
     if (expandedPlayer !== playerName) {
+      // Close current player and open the new one
       setExpandedPlayer(playerName);
+      
+      // Scroll to the newly opened player
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: index,
+          animated: true,
+          viewPosition: 0, // Position player at the top
+        });
+      }, 100); // Short delay to allow the expand animation to start
     } else {
+      // Close the currently open player - no scrolling
       setExpandedPlayer(null);
     }
   };
@@ -100,6 +114,20 @@ export default function HomeScreen({ navigation, route }) {
   const handleEditGame = (gameId) => {
     console.log('Edit game:', gameId);
     // TODO: Navigate to edit screen when implemented
+  };
+
+  const handleDeleteGame = (gameId) => {
+    try {
+      // Delete from database
+      deleteGame(gameId);
+      console.log('Game deleted from database:', gameId);
+      
+      // Remove game from state (for immediate UI update)
+      setGames(prevGames => prevGames.filter(game => game._id !== gameId));
+    } catch (error) {
+      console.error('Error deleting game:', error);
+      // Optionally show error to user
+    }
   };
 
   return (
@@ -123,10 +151,14 @@ export default function HomeScreen({ navigation, route }) {
             isExpanded={expandedPlayer === item.player}
             onToggle={() => handleTogglePlayer(item.player, index)}
             onEditGame={handleEditGame}
+            onDeleteGame={handleDeleteGame}
           />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+        }}
         onScrollToIndexFailed={(info) => {
           const wait = new Promise(resolve => setTimeout(resolve, 500));
           wait.then(() => {

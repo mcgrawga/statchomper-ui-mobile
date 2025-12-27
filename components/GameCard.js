@@ -1,8 +1,39 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Animated } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 
-export default function GameCard({ game, onEdit }) {
+export default function GameCard({ game, onEdit, onDelete }) {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const marginAnim = useRef(new Animated.Value(12)).current;
+  
+  const handleDelete = () => {
+    // Animate the card out
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(marginAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      // After animation completes, call parent's onDelete
+      if (onDelete) {
+        onDelete(game._id);
+      }
+    });
+  };
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -19,7 +50,19 @@ export default function GameCard({ game, onEdit }) {
   };
 
   return (
-    <View style={styles.card}>
+    <Animated.View style={[
+      {
+        marginBottom: marginAnim,
+        overflow: 'hidden',
+      },
+    ]}>
+      <Animated.View style={[
+        {
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}>
+        <View style={styles.card}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -27,12 +70,7 @@ export default function GameCard({ game, onEdit }) {
           <Text style={styles.date}>{formatDate(game.datePlayed)}</Text>
           <Text style={styles.opponent}>vs. {game.opponent}</Text>
         </View>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={() => onEdit && onEdit(game._id)}
-        >
-          <Text style={styles.editIcon}>✏️</Text>
-        </TouchableOpacity>
+        <MenuButton game={game} onDelete={handleDelete} />
       </View>
 
       {/* Stats */}
@@ -61,7 +99,9 @@ export default function GameCard({ game, onEdit }) {
           />
         </View>
       </View>
-    </View>
+      </View>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
@@ -72,6 +112,116 @@ function StatItem({ label, value }) {
       <Text style={styles.statItemLabel}>{label}</Text>
       <Text style={styles.statItemValue}> {value}</Text>
     </View>
+  );
+}
+
+// Menu button component
+function MenuButton({ game, onDelete }) {
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [buttonLayout, setButtonLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const buttonRef = React.useRef(null);
+  
+  const handlePress = () => {
+    if (buttonRef.current) {
+      buttonRef.current.measureInWindow((x, y, width, height) => {
+        setButtonLayout({ x, y, width, height });
+        setMenuVisible(true);
+      });
+    }
+  };
+  
+  const handleDeletePress = () => {
+    setMenuVisible(false);
+    setDeleteConfirmVisible(true);
+  };
+  
+  const handleConfirmDelete = () => {
+    setDeleteConfirmVisible(false);
+    if (onDelete) {
+      onDelete();
+    }
+  };
+  
+  return (
+    <>
+      <TouchableOpacity 
+        ref={buttonRef}
+        style={styles.menuButton}
+        onPress={handlePress}
+      >
+        <Text style={styles.menuIcon}>⋯</Text>
+      </TouchableOpacity>
+      
+      {/* Menu Modal */}
+      <Modal
+        transparent={true}
+        visible={menuVisible}
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <Pressable 
+          style={styles.menuOverlay} 
+          onPress={() => setMenuVisible(false)}
+        >
+          <View style={[styles.menuContainer, { 
+            top: buttonLayout.y + buttonLayout.height,
+            right: 16
+          }]}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => {
+                setMenuVisible(false);
+                // Edit action will go here
+              }}
+            >
+              <Feather name="edit-2" size={16} color="#666" />
+              <Text style={styles.menuItemText}>Edit</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleDeletePress}
+            >
+              <Feather name="trash-2" size={16} color="#d32f2f" />
+              <Text style={[styles.menuItemText, styles.deleteText]}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </Pressable>
+      </Modal>
+      
+      {/* Delete Confirmation Modal */}
+      <Modal
+        transparent={true}
+        visible={deleteConfirmVisible}
+        animationType="fade"
+        onRequestClose={() => setDeleteConfirmVisible(false)}
+      >
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmDialog}>
+            <Text style={styles.confirmTitle}>Delete {game.player}'s game?</Text>
+            <Text style={styles.confirmMessage}>Are you sure? This can NOT be undone.</Text>
+            
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setDeleteConfirmVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.deleteButton}
+                onPress={handleConfirmDelete}
+              >
+                <Feather name="trash-2" size={16} color="#fff" />
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -122,6 +272,117 @@ const styles = StyleSheet.create({
   },
   editIcon: {
     fontSize: 20,
+  },
+  menuButton: {
+    padding: 8,
+  },
+  menuIcon: {
+    fontSize: 24,
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  menuContainer: {
+    position: 'absolute',
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    minWidth: 150,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    gap: 12,
+  },
+  menuItemIcon: {
+    fontSize: 18,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  deleteText: {
+    color: '#d32f2f',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
+  },
+  confirmOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  confirmDialog: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  confirmTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#222',
+    marginBottom: 12,
+  },
+  confirmMessage: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  deleteButton: {
+    flex: 1,
+    flexDirection: 'row',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#d32f2f',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
   statsContainer: {
     padding: 12,

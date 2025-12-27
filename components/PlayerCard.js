@@ -3,17 +3,25 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, TextInp
 import GameCard from './GameCard';
 import Colors from '../constants/Colors';
 
-export default function PlayerCard({ player, games, isExpanded, onToggle, onEditGame }) {
+export default function PlayerCard({ player, games, isExpanded, onToggle, onEditGame, onDeleteGame }) {
   const [chevronRotation] = useState(new Animated.Value(0));
+  const [contentHeight] = useState(new Animated.Value(0));
   const [filterText, setFilterText] = useState('');
 
-  // Animate chevron rotation when expanded state changes
+  // Animate chevron rotation and content height when expanded state changes
   React.useEffect(() => {
-    Animated.timing(chevronRotation, {
-      toValue: isExpanded ? 1 : 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(chevronRotation, {
+        toValue: isExpanded ? 1 : 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentHeight, {
+        toValue: isExpanded ? 1 : 0,
+        duration: 500,
+        useNativeDriver: false,
+      }),
+    ]).start();
   }, [isExpanded]);
 
   const chevronRotate = chevronRotation.interpolate({
@@ -60,8 +68,21 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
       </TouchableOpacity>
 
       {/* Expanded Games List */}
-      {isExpanded && (
-        <View style={styles.gamesContainer}>
+      <Animated.View style={[
+        styles.gamesContainer,
+        {
+          maxHeight: contentHeight.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 2000],
+          }),
+          opacity: contentHeight.interpolate({
+            inputRange: [0, 0.3, 1],
+            outputRange: [0, 0, 1],
+          }),
+          overflow: 'hidden',
+        },
+      ]}>
+        <View>
           {/* Filter Input */}
           <View style={styles.filterContainer}>
             <Text style={styles.searchIcon}>🔍</Text>
@@ -81,18 +102,16 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
 
           {/* Games List or Empty State */}
           {filteredGames.length > 0 ? (
-            <ScrollView
-              nestedScrollEnabled={true}
-              showsVerticalScrollIndicator={false}
-            >
+            <View>
               {filteredGames.map((game) => (
                 <GameCard 
                   key={game._id}
                   game={game} 
                   onEdit={onEditGame}
+                  onDelete={onDeleteGame}
                 />
               ))}
-            </ScrollView>
+            </View>
           ) : (
             <View style={styles.emptyState}>
               <Text style={styles.emptyIcon}>🏀</Text>
@@ -101,7 +120,7 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
             </View>
           )}
         </View>
-      )}
+      </Animated.View>
     </View>
   );
 }
