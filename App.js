@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
+import EditGameScreen from './screens/EditGameScreen';
 import { initDatabase, seedDatabase } from './services/database';
 import Colors from './constants/Colors';
 
@@ -53,6 +54,7 @@ export default function App() {
       >
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AddGame" component={AddGameScreen} />
+        <Stack.Screen name="EditGame" component={EditGameScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

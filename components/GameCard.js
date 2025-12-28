@@ -70,7 +70,7 @@ export default function GameCard({ game, onEdit, onDelete }) {
           <Text style={styles.date}>{formatDate(game.datePlayed)}</Text>
           <Text style={styles.opponent}>vs. {game.opponent}</Text>
         </View>
-        <MenuButton game={game} onDelete={handleDelete} />
+        <MenuButton game={game} onEdit={onEdit} onDelete={handleDelete} />
       </View>
 
       {/* Stats */}
@@ -116,7 +116,7 @@ function StatItem({ label, value }) {
 }
 
 // Menu button component
-function MenuButton({ game, onDelete }) {
+function MenuButton({ game, onEdit, onDelete }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [buttonLayout, setButtonLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -172,7 +172,9 @@ function MenuButton({ game, onDelete }) {
               style={styles.menuItem}
               onPress={() => {
                 setMenuVisible(false);
-                // Edit action will go here
+                if (onEdit) {
+                  onEdit(game._id);
+                }
               }}
             >
               <Feather name="edit-2" size={16} color="#666" />

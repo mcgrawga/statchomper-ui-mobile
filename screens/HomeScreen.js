@@ -112,8 +112,11 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const handleEditGame = (gameId) => {
-    console.log('Edit game:', gameId);
-    // TODO: Navigate to edit screen when implemented
+    // Find the game by ID
+    const game = games.find(g => g._id === gameId);
+    if (game) {
+      navigation.navigate('EditGame', { game });
+    }
   };
 
   const handleDeleteGame = (gameId) => {
