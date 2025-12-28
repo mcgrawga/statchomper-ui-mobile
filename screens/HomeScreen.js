@@ -139,6 +139,14 @@ export default function HomeScreen({ navigation, route }) {
         <Text style={styles.headerTitle}>🏀 Statchomper</Text>
       </View>
 
+      {/* Page Heading */}
+      <View style={styles.pageHeadingContainer}>
+        <Text style={styles.pageHeading}>Players</Text>
+        <Text style={styles.pageSubheading}>
+          {playerData.length} {playerData.length === 1 ? 'player' : 'players'}
+        </Text>
+      </View>
+
       {/* Player List */}
       <FlatList
         ref={flatListRef}
@@ -198,6 +206,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
     textAlign: 'center',
+  },
+  pageHeadingContainer: {
+    backgroundColor: Colors.background,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
+  pageHeading: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  pageSubheading: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.textSecondary,
   },
   listContent: {
     padding: 16,
