@@ -1,12 +1,108 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, TextInput, PanResponder, Modal, Pressable } from 'react-native';
 import GameCard from './GameCard';
 import Colors from '../constants/Colors';
 
-export default function PlayerCard({ player, games, isExpanded, onToggle, onEditGame, onDeleteGame }) {
+export default function PlayerCard({ player, games, isExpanded, onToggle, onEditGame, onDeleteGame, onDeletePlayer }) {
   const [chevronRotation] = useState(new Animated.Value(0));
   const [contentHeight] = useState(new Animated.Value(0));
   const [filterText, setFilterText] = useState('');
+  
+  // Swipe animation state
+  const swipeAnim = useRef(new Animated.Value(0)).current;
+  const [isSwipedOpen, setIsSwipedOpen] = useState(false);
+  
+  // Delete animation state
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const marginAnim = useRef(new Animated.Value(16)).current;
+  
+  // Modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  // PanResponder for swipe gesture
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only respond if:
+        // 1. Player is not expanded
+        // 2. Movement is primarily horizontal (more dx than dy)
+        // 3. Swiping to the right (positive dx)
+        const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+        const isSwipingRight = gestureState.dx > 5;
+        return !isExpanded && isHorizontal && isSwipingRight;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dx > 0 && gestureState.dx < 176) {
+          swipeAnim.setValue(gestureState.dx);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        // Card width threshold is 50%
+        if (gestureState.dx > 80) {
+          // Swipe open - 176px total (8 + 76 + 8 + 76 + 8)
+          Animated.spring(swipeAnim, {
+            toValue: 176,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 7,
+          }).start();
+          setIsSwipedOpen(true);
+        } else {
+          // Swipe back closed
+          Animated.spring(swipeAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 50,
+            friction: 7,
+          }).start();
+          setIsSwipedOpen(false);
+        }
+      },
+    })
+  ).current;
+  
+  const handleCancel = () => {
+    Animated.spring(swipeAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 50,
+      friction: 7,
+    }).start();
+    setIsSwipedOpen(false);
+  };
+  
+  const handleDeletePress = () => {
+    setShowDeleteModal(true);
+  };
+  
+  const handleConfirmDelete = () => {
+    setShowDeleteModal(false);
+    
+    // Animate out
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(marginAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: false,
+      }),
+    ]).start(() => {
+      if (onDeletePlayer) {
+        onDeletePlayer(player);
+      }
+    });
+  };
 
   // Animate chevron rotation and content height when expanded state changes
   React.useEffect(() => {
@@ -44,13 +140,50 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
   });
 
   return (
-    <View style={styles.container}>
-      {/* Player Header Button */}
-      <TouchableOpacity 
-        style={styles.headerButton}
-        onPress={onToggle}
-        activeOpacity={0.7}
-      >
+    <Animated.View style={[
+      styles.outerContainer,
+      {
+        marginBottom: marginAnim,
+      },
+    ]}>
+      <Animated.View style={[
+        {
+          opacity: fadeAnim,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}>
+        <View style={styles.container}>
+          {/* Action Buttons Behind */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={handleCancel}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.deleteButton}
+              onPress={handleDeletePress}
+            >
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        
+        {/* Swipeable Content */}
+        <Animated.View 
+          style={[
+            styles.swipeableContent,
+            { transform: [{ translateX: swipeAnim }] }
+          ]}
+          {...panResponder.panHandlers}
+        >
+          {/* Player Header Button */}
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={onToggle}
+            activeOpacity={0.7}
+            disabled={isSwipedOpen}
+          >
         <View style={styles.headerLeft}>
           <Text style={styles.playerName}>{player}</Text>
           <View style={styles.badge}>
@@ -121,13 +254,89 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
           )}
         </View>
       </Animated.View>
-    </View>
+        </Animated.View>
+      </View>
+      
+      {/* Delete Confirmation Modal */}
+      <Modal
+        transparent={true}
+        visible={showDeleteModal}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.confirmOverlay}>
+          <View style={styles.confirmDialog}>
+            <Text style={styles.confirmTitle}>Delete {player}?</Text>
+            <Text style={styles.confirmMessage}>
+              This will permanently delete {player} and all {games.length} {games.length === 1 ? 'game' : 'games'}. This action cannot be undone.
+            </Text>
+            
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={styles.modalCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.modalDeleteButton}
+                onPress={handleConfirmDelete}
+              >
+                <Text style={styles.modalDeleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      </Animated.View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    overflow: 'hidden',
+  },
   container: {
-    marginBottom: 16,
+    position: 'relative',
+  },
+  actionButtons: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    height: 68,
+    flexDirection: 'row',
+    gap: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
+  },
+  cancelButton: {
+    width: 76,
+    backgroundColor: '#10b981',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  cancelButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  deleteButton: {
+    width: 76,
+    backgroundColor: '#d32f2f',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 12,
+  },
+  deleteButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  swipeableContent: {
+    backgroundColor: Colors.background,
   },
   headerButton: {
     flexDirection: 'row',
@@ -226,5 +435,60 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  confirmOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmDialog: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+  },
+  confirmTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  confirmMessage: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  modalCancelButtonText: {
+    color: Colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalDeleteButton: {
+    flex: 1,
+    backgroundColor: '#d32f2f',
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalDeleteButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

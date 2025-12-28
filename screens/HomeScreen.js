@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import PlayerCard from '../components/PlayerCard';
-import { getAllGames, deleteGame } from '../services/database';
+import { getAllGames, deleteGame, deletePlayerGames } from '../services/database';
 import Colors from '../constants/Colors';
 
 export default function HomeScreen({ navigation, route }) {
@@ -133,6 +133,25 @@ export default function HomeScreen({ navigation, route }) {
     }
   };
 
+  const handleDeletePlayer = (playerName) => {
+    try {
+      // Delete all games for this player from database
+      deletePlayerGames(playerName);
+      console.log('Deleted all games for player:', playerName);
+      
+      // Remove all games for this player from state (for immediate UI update)
+      setGames(prevGames => prevGames.filter(game => game.player !== playerName));
+      
+      // Close expansion if this player was expanded
+      if (expandedPlayer === playerName) {
+        setExpandedPlayer(null);
+      }
+    } catch (error) {
+      console.error('Error deleting player:', error);
+      // Optionally show error to user
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
@@ -163,6 +182,7 @@ export default function HomeScreen({ navigation, route }) {
             onToggle={() => handleTogglePlayer(item.player, index)}
             onEditGame={handleEditGame}
             onDeleteGame={handleDeleteGame}
+            onDeletePlayer={handleDeletePlayer}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -196,7 +216,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: Colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 32,
     paddingHorizontal: 20,
     shadowColor: Colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
@@ -205,7 +225,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 36,
     fontWeight: '700',
     color: '#ffffff',
     textAlign: 'center',

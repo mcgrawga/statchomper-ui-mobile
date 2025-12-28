@@ -260,6 +260,19 @@ export const deleteGame = (gameId) => {
   }
 };
 
+// Delete all games for a player
+export const deletePlayerGames = (playerName) => {
+  try {
+    const database = getDb();
+    const result = database.runSync('DELETE FROM games WHERE player = ?', [playerName]);
+    console.log(`Deleted ${result.changes} games for player: ${playerName}`);
+    return result.changes;
+  } catch (error) {
+    console.error('Error deleting player games:', error);
+    throw error;
+  }
+};
+
 // Update a game
 export const updateGame = (gameId, gameData) => {
   try {
