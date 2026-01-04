@@ -169,34 +169,45 @@ export default function HomeScreen({ navigation, route }) {
         </Text>
       </View>
 
-      {/* Player List */}
-      <FlatList
-        ref={flatListRef}
-        data={playerData}
-        keyExtractor={(item) => item.player}
-        renderItem={({ item, index }) => (
-          <PlayerCard
-            player={item.player}
-            games={item.games}
-            isExpanded={expandedPlayer === item.player}
-            onToggle={() => handleTogglePlayer(item.player, index)}
-            onEditGame={handleEditGame}
-            onDeleteGame={handleDeleteGame}
-            onDeletePlayer={handleDeletePlayer}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        maintainVisibleContentPosition={{
-          minIndexForVisible: 0,
-        }}
-        onScrollToIndexFailed={(info) => {
-          const wait = new Promise(resolve => setTimeout(resolve, 500));
-          wait.then(() => {
-            flatListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
-          });
-        }}
-      />
+      {/* Empty State */}
+      {playerData.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateTitle}>No Games Yet</Text>
+          <Text style={styles.emptyStateText}>
+            Tap the + button below to add your first game
+          </Text>
+          <Text style={styles.emptyStateIcon}>👇</Text>
+        </View>
+      ) : (
+        /* Player List */
+        <FlatList
+          ref={flatListRef}
+          data={playerData}
+          keyExtractor={(item) => item.player}
+          renderItem={({ item, index }) => (
+            <PlayerCard
+              player={item.player}
+              games={item.games}
+              isExpanded={expandedPlayer === item.player}
+              onToggle={() => handleTogglePlayer(item.player, index)}
+              onEditGame={handleEditGame}
+              onDeleteGame={handleDeleteGame}
+              onDeletePlayer={handleDeletePlayer}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          maintainVisibleContentPosition={{
+            minIndexForVisible: 0,
+          }}
+          onScrollToIndexFailed={(info) => {
+            const wait = new Promise(resolve => setTimeout(resolve, 500));
+            wait.then(() => {
+              flatListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
+            });
+          }}
+        />
+      )}
 
       {/* Floating Action Button */}
       <TouchableOpacity 
@@ -251,6 +262,29 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    paddingBottom: 100,
+  },
+  emptyStateTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: Colors.textPrimary,
+    marginBottom: 12,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  emptyStateIcon: {
+    fontSize: 48,
+    marginTop: 20,
   },
   fab: {
     position: 'absolute',

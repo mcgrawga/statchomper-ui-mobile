@@ -58,6 +58,19 @@ const getDb = () => {
   return db;
 };
 
+// Clear all data from the database
+export const clearDatabase = () => {
+  try {
+    const database = getDb();
+    const result = database.runSync('DELETE FROM games');
+    console.log(`Cleared ${result.changes} games from database`);
+    return result.changes;
+  } catch (error) {
+    console.error('Error clearing database:', error);
+    throw error;
+  }
+};
+
 // Seed database with mock data
 export const seedDatabase = () => {
   try {

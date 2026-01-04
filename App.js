@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
-import { initDatabase, seedDatabase } from './services/database';
+import { initDatabase, seedDatabase, clearDatabase } from './services/database';
 import Colors from './constants/Colors';
 
 const Stack = createNativeStackNavigator();
@@ -23,7 +23,7 @@ export default function App() {
           setIsDbReady(true); // Continue anyway to show the error to the user
           return;
         }
-        console.log('Database initialized, now seeding...');
+        console.log('Database initialized');
         seedDatabase();
         console.log('Database setup complete');
         setIsDbReady(true);
