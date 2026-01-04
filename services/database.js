@@ -38,6 +38,23 @@ export const initDatabase = () => {
       );
     `);
     
+    // Create settings table for app settings including pro status
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS settings (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        isPro INTEGER DEFAULT 0,
+        createdAt TEXT DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    
+    // Insert default settings row if it doesn't exist
+    const settingsExists = db.getFirstSync('SELECT id FROM settings WHERE id = 1');
+    if (!settingsExists) {
+      db.runSync('INSERT INTO settings (id, isPro) VALUES (1, 0)');
+      console.log('Default settings initialized');
+    }
+    
     console.log('Database initialized successfully');
     return true;
   } catch (error) {
@@ -47,7 +64,7 @@ export const initDatabase = () => {
 };
 
 // Get database instance
-const getDb = () => {
+export const getDb = () => {
   if (!db) {
     console.log('Database not initialized, initializing now...');
     initDatabase();
@@ -324,5 +341,33 @@ export const updateGame = (gameId, gameData) => {
   } catch (error) {
     console.error('Error updating game:', error);
     throw error;
+  }
+};
+
+// Get pro status
+export const getProStatus = () => {
+  try {
+    const database = getDb();
+    const result = database.getFirstSync('SELECT isPro FROM settings WHERE id = 1');
+    return result ? result.isPro === 1 : false;
+  } catch (error) {
+    console.error('Error getting pro status:', error);
+    return false;
+  }
+};
+
+// Set pro status
+export const setProStatus = (isPro) => {
+  try {
+    const database = getDb();
+    database.runSync(
+      'UPDATE settings SET isPro = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = 1',
+      [isPro ? 1 : 0]
+    );
+    console.log('Pro status updated to:', isPro);
+    return true;
+  } catch (error) {
+    console.error('Error setting pro status:', error);
+    return false;
   }
 };

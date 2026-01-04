@@ -6,7 +6,8 @@ import {
   FlatList, 
   SafeAreaView,
   StatusBar,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import PlayerCard from '../components/PlayerCard';
@@ -19,6 +20,7 @@ export default function HomeScreen({ navigation, route }) {
   const [shouldScrollToPlayer, setShouldScrollToPlayer] = useState(false);
   const flatListRef = useRef(null);
   const [games, setGames] = useState([]);
+  const lastExpandParam = useRef(null);
 
   // Load games from database
   const loadGames = () => {
@@ -36,14 +38,17 @@ export default function HomeScreen({ navigation, route }) {
     React.useCallback(() => {
       loadGames();
       
-      // Check if we need to expand a specific player
-      if (route.params?.expandPlayer) {
-        const playerToExpand = route.params.expandPlayer;
-        setExpandedPlayer(playerToExpand);
+      // Check if expandPlayer param exists
+      const currentExpandParam = route.params?.expandPlayer;
+      
+      if (currentExpandParam) {
+        // Expand this player
+        setExpandedPlayer(currentExpandParam);
         setShouldScrollToPlayer(true);
         
-        // Clear the param so it doesn't trigger again
+        // Clear the param and reset ref so it can trigger again
         navigation.setParams({ expandPlayer: undefined });
+        lastExpandParam.current = null;
       }
     }, [route.params?.expandPlayer])
   );
@@ -183,7 +188,8 @@ export default function HomeScreen({ navigation, route }) {
         <FlatList
           ref={flatListRef}
           data={playerData}
-          keyExtractor={(item) => item.player}
+          extraData={games}
+          keyExtractor={(item) => `${item.player}-${item.games.map(g => g._id).join('-')}`}
           renderItem={({ item, index }) => (
             <PlayerCard
               player={item.player}
@@ -212,7 +218,11 @@ export default function HomeScreen({ navigation, route }) {
       {/* Floating Action Button */}
       <TouchableOpacity 
         style={styles.fab}
-        onPress={() => navigation.navigate('AddGame')}
+        onPress={() => {
+          setExpandedPlayer(null);
+          navigation.setParams({ expandPlayer: undefined });
+          navigation.navigate('AddGame');
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

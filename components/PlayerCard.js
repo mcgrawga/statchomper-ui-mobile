@@ -26,12 +26,11 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
       onStartShouldSetPanResponder: () => false,
       onMoveShouldSetPanResponder: (_, gestureState) => {
         // Only respond if:
-        // 1. Player is not expanded
-        // 2. Movement is primarily horizontal (more dx than dy)
-        // 3. Swiping to the right (positive dx)
+        // 1. Movement is primarily horizontal (more dx than dy)
+        // 2. Swiping to the right (positive dx)
         const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
         const isSwipingRight = gestureState.dx > 5;
-        return !isExpanded && isHorizontal && isSwipingRight;
+        return isHorizontal && isSwipingRight;
       },
       onPanResponderMove: (_, gestureState) => {
         if (gestureState.dx > 0 && gestureState.dx < 176) {
@@ -103,6 +102,14 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
       }
     });
   };
+
+  // Reset swipe state when games change (e.g., after adding a new game)
+  React.useEffect(() => {
+    if (isSwipedOpen) {
+      swipeAnim.setValue(0);
+      setIsSwipedOpen(false);
+    }
+  }, [games.length]);
 
   // Animate chevron rotation and content height when expanded state changes
   React.useEffect(() => {

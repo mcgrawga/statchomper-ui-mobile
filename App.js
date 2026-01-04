@@ -6,6 +6,7 @@ import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
 import { initDatabase, seedDatabase, clearDatabase } from './services/database';
+import { initializeIAP, closeIAP, restorePurchases } from './services/purchases';
 import Colors from './constants/Colors';
 
 const Stack = createNativeStackNavigator();
@@ -24,8 +25,30 @@ export default function App() {
           return;
         }
         console.log('Database initialized');
+        
+        // Reset to initial state: clear all games and reset pro status
+        clearDatabase();
+        console.log('Database cleared');
+        
+        // Reset pro status to false
+        const database = require('./services/database').getDb();
+        database.runSync('UPDATE settings SET isPro = 0 WHERE id = 1');
+        console.log('Pro status reset');
+        
+        // Reseed with initial 3 players
         seedDatabase();
+        console.log('Database reseeded with initial data');
+        
         console.log('Database setup complete');
+        
+        // Initialize IAP
+        await initializeIAP();
+        console.log('IAP initialized');
+        
+        // Automatically restore purchases on startup
+        const { success, message } = await restorePurchases();
+        console.log('Auto-restore purchases:', message);
+        
         setIsDbReady(true);
       } catch (error) {
         console.error('Failed to initialize database:', error);
@@ -35,6 +58,11 @@ export default function App() {
     };
     
     setupDatabase();
+    
+    // Cleanup IAP connection on unmount
+    return () => {
+      closeIAP();
+    };
   }, []);
 
   if (!isDbReady) {

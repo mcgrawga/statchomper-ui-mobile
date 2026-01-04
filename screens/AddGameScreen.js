@@ -18,16 +18,19 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Colors from '../constants/Colors';
 import { getPlayers, addGame } from '../services/database';
+import { checkProStatus, purchaseProVersion } from '../services/purchases';
 
 export default function AddGameScreen({ navigation }) {
   // Form state
   const [player, setPlayer] = useState('');
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [opponent, setOpponent] = useState('');
   const [players, setPlayers] = useState([]);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   
   // Toast notification state
   const [showToast, setShowToast] = useState(false);
@@ -101,6 +104,50 @@ export default function AddGameScreen({ navigation }) {
 
   const handleIncrement = (setter, value) => {
     setter(value + 1);
+  };
+
+  const handlePlayerSelect = (selectedPlayer) => {
+    if (selectedPlayer === ADD_NEW_PLAYER) {
+      // Check if user can add new player
+      const isPro = checkProStatus();
+      const playerCount = players.length;
+      
+      if (playerCount >= 3 && !isPro) {
+        // Show upgrade modal
+        setShowPlayerPicker(false);
+        setShowUpgradeModal(true);
+      } else {
+        // Allow adding new player
+        setPlayer(selectedPlayer);
+        setShowPlayerPicker(false);
+      }
+    } else {
+      // Select existing player
+      setPlayer(selectedPlayer);
+      setShowPlayerPicker(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    setIsPurchasing(true);
+    try {
+      const result = await purchaseProVersion();
+      
+      if (result.success) {
+        Alert.alert('Success!', 'You now have unlimited players!');
+        setShowUpgradeModal(false);
+        // Allow them to add new player now
+        setPlayer(ADD_NEW_PLAYER);
+        setShowPlayerPicker(false);
+      } else if (!result.cancelled) {
+        Alert.alert('Purchase Failed', result.message || 'Unable to complete purchase. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during purchase:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsPurchasing(false);
+    }
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -486,10 +533,7 @@ export default function AddGameScreen({ navigation }) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.playerOption}
-                  onPress={() => {
-                    setPlayer(item);
-                    setShowPlayerPicker(false);
-                  }}
+                  onPress={() => handlePlayerSelect(item)}
                 >
                   <Text style={styles.playerOptionText}>{item}</Text>
                   {player === item && (
@@ -498,6 +542,68 @@ export default function AddGameScreen({ navigation }) {
                 </TouchableOpacity>
               )}
             />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Upgrade Modal */}
+      <Modal
+        visible={showUpgradeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowUpgradeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.upgradeModalContent}>
+            <View style={styles.upgradeHeader}>
+              <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
+              <Text style={styles.upgradePrice}>$6.99</Text>
+            </View>
+            
+            <View style={styles.upgradeBody}>
+              <View style={styles.limitMessage}>
+                <Text style={styles.limitIcon}>🏀</Text>
+                <Text style={styles.limitText}>
+                  Free version is limited to 3 players
+                </Text>
+              </View>
+              
+              <View style={styles.benefitsSection}>
+                <Text style={styles.benefitsTitle}>Pro Benefits:</Text>
+                <View style={styles.benefitItem}>
+                  <Text style={styles.benefitIcon}>✓</Text>
+                  <Text style={styles.benefitText}>Unlimited players</Text>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Text style={styles.benefitIcon}>✓</Text>
+                  <Text style={styles.benefitText}>One-time purchase</Text>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Text style={styles.benefitIcon}>✓</Text>
+                  <Text style={styles.benefitText}>Support development</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.upgradeActions}>
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={handleUpgrade}
+                disabled={isPurchasing}
+              >
+                <Text style={styles.upgradeButtonText}>
+                  {isPurchasing ? 'Processing...' : 'Upgrade Now'}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.cancelUpgradeButton}
+                onPress={() => setShowUpgradeModal(false)}
+                disabled={isPurchasing}
+              >
+                <Text style={styles.cancelUpgradeText}>Maybe Later</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -873,5 +979,108 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     flex: 1,
+  },
+  upgradeModalContent: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
+    width: '85%',
+    maxWidth: 400,
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  upgradeHeader: {
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  upgradeTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  upgradePrice: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+  upgradeBody: {
+    padding: 24,
+  },
+  limitMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  limitIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  limitText: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  benefitsSection: {
+    gap: 12,
+  },
+  benefitsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  benefitIcon: {
+    fontSize: 20,
+    color: Colors.primary,
+    marginRight: 12,
+    fontWeight: '700',
+  },
+  benefitText: {
+    fontSize: 16,
+    color: Colors.textPrimary,
+  },
+  upgradeActions: {
+    padding: 24,
+    paddingTop: 0,
+    gap: 12,
+  },
+  upgradeButton: {
+    backgroundColor: Colors.primary,
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  upgradeButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  cancelUpgradeButton: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  cancelUpgradeText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
