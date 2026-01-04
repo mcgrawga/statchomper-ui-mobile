@@ -158,7 +158,7 @@ export default function HomeScreen({ navigation, route }) {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏀 Statchomper</Text>
+        <Text style={styles.headerTitle}>🏀 HoopTrack</Text>
       </View>
 
       {/* Page Heading */}
