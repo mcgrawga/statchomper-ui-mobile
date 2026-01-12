@@ -75,7 +75,7 @@ export default function AddGameScreen({ navigation }) {
   // Calculate percentage
   const calculatePercentage = (made, attempts) => {
     if (attempts === 0) return 'n/a';
-    return ((made / attempts) * 100).toFixed(1) + '%';
+    return Math.round((made / attempts) * 100) + '%';
   };
 
   // Quick-entry functions
@@ -204,7 +204,7 @@ export default function AddGameScreen({ navigation }) {
     // Create game object
     const game = {
       player: playerName.trim(),
-      datePlayed: date.toISOString().split('T')[0],
+      datePlayed: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`,
       opponent: opponent.trim(),
       boxScore: {
         points: calculatePoints(),
@@ -284,7 +284,7 @@ export default function AddGameScreen({ navigation }) {
             onPress={() => setShowPlayerPicker(true)}
           >
             <Text style={[styles.dropdownButtonText, !player && styles.dropdownPlaceholder]}>
-              {player || 'Select player'}
+              {player || 'Select or add a player'}
             </Text>
             <Text style={styles.dropdownIcon}>▼</Text>
           </TouchableOpacity>
@@ -335,6 +335,45 @@ export default function AddGameScreen({ navigation }) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Shooting Statistics</Text>
           
+          {/* Free Throws */}
+          <View style={styles.statGroup}>
+            <Text style={styles.statLabel}>Free Throws</Text>
+            <View style={styles.shootingInputRow}>
+              <View style={styles.shootingInputGroup}>
+                <Text style={styles.shootingInputLabel}>Made</Text>
+                <TextInput
+                  style={styles.shootingInput}
+                  value={String(freeThrowMade)}
+                  onChangeText={(text) => setFreeThrowMade(parseInt(text) || 0)}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.shootingInputGroup}>
+                <Text style={styles.shootingInputLabel}>Attempts</Text>
+                <TextInput
+                  style={styles.shootingInput}
+                  value={String(freeThrowAttempts)}
+                  onChangeText={(text) => setFreeThrowAttempts(parseInt(text) || 0)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+            <View style={styles.quickEntryRow}>
+              <TouchableOpacity 
+                style={[styles.button, styles.makeButton]}
+                onPress={() => handleMake('ft')}
+              >
+                <Text style={styles.buttonText}>+ Make</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, styles.missButton]}
+                onPress={() => handleMiss('ft')}
+              >
+                <Text style={styles.buttonText}>- Miss</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* 2-Pointers */}
           <View style={styles.statGroup}>
             <Text style={styles.statLabel}>2-Pointers</Text>
@@ -413,45 +452,6 @@ export default function AddGameScreen({ navigation }) {
             </View>
           </View>
 
-          {/* Free Throws */}
-          <View style={styles.statGroup}>
-            <Text style={styles.statLabel}>Free Throws</Text>
-            <View style={styles.shootingInputRow}>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Made</Text>
-                <TextInput
-                  style={styles.shootingInput}
-                  value={String(freeThrowMade)}
-                  onChangeText={(text) => setFreeThrowMade(parseInt(text) || 0)}
-                  keyboardType="numeric"
-                />
-              </View>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Attempts</Text>
-                <TextInput
-                  style={styles.shootingInput}
-                  value={String(freeThrowAttempts)}
-                  onChangeText={(text) => setFreeThrowAttempts(parseInt(text) || 0)}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-            <View style={styles.quickEntryRow}>
-              <TouchableOpacity 
-                style={[styles.button, styles.makeButton]}
-                onPress={() => handleMake('ft')}
-              >
-                <Text style={styles.buttonText}>+ Make</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.button, styles.missButton]}
-                onPress={() => handleMiss('ft')}
-              >
-                <Text style={styles.buttonText}>- Miss</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           {/* Points Summary */}
           <View style={styles.pointsSummary}>
             <Text style={styles.pointsLabel}>Total Points</Text>
@@ -504,7 +504,7 @@ export default function AddGameScreen({ navigation }) {
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>🏀 Add Game</Text>
+          <Text style={styles.submitButtonText}>🏀 Save Game</Text>
         </TouchableOpacity>
       </ScrollView>
       </KeyboardAvoidingView>
@@ -519,7 +519,7 @@ export default function AddGameScreen({ navigation }) {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Player</Text>
+              <Text style={styles.modalTitle}>Select or Add a Player</Text>
               <TouchableOpacity
                 onPress={() => setShowPlayerPicker(false)}
                 style={styles.modalCloseButton}
@@ -892,7 +892,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: Colors.background,
     borderRadius: 8,
-    padding: 16,
+    padding: 20,
     marginBottom: 12,
     alignItems: 'center',
   },
@@ -904,7 +904,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   summaryCardValue: {
-    fontSize: 20,
+    fontSize: 42,
     fontWeight: '700',
     color: Colors.textPrimary,
   },

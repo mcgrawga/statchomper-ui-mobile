@@ -74,7 +74,7 @@ export default function EditGameScreen({ navigation, route }) {
   // Calculate percentage
   const calculatePercentage = (made, attempts) => {
     if (attempts === 0) return 'n/a';
-    return ((made / attempts) * 100).toFixed(1) + '%';
+    return Math.round((made / attempts) * 100) + '%';
   };
 
   // Quick-entry functions
@@ -290,6 +290,45 @@ export default function EditGameScreen({ navigation, route }) {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Shooting Statistics</Text>
           
+          {/* Free Throws */}
+          <View style={styles.statGroup}>
+            <Text style={styles.statLabel}>Free Throws</Text>
+            <View style={styles.shootingInputRow}>
+              <View style={styles.shootingInputGroup}>
+                <Text style={styles.shootingInputLabel}>Made</Text>
+                <TextInput
+                  style={styles.shootingInput}
+                  value={String(freeThrowMade)}
+                  onChangeText={(text) => setFreeThrowMade(parseInt(text) || 0)}
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.shootingInputGroup}>
+                <Text style={styles.shootingInputLabel}>Attempts</Text>
+                <TextInput
+                  style={styles.shootingInput}
+                  value={String(freeThrowAttempts)}
+                  onChangeText={(text) => setFreeThrowAttempts(parseInt(text) || 0)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+            <View style={styles.quickEntryRow}>
+              <TouchableOpacity 
+                style={[styles.button, styles.makeButton]}
+                onPress={() => handleMake('ft')}
+              >
+                <Text style={styles.buttonText}>+ Make</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, styles.missButton]}
+                onPress={() => handleMiss('ft')}
+              >
+                <Text style={styles.buttonText}>- Miss</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           {/* 2-Pointers */}
           <View style={styles.statGroup}>
             <Text style={styles.statLabel}>2-Pointers</Text>
@@ -362,45 +401,6 @@ export default function EditGameScreen({ navigation, route }) {
               <TouchableOpacity 
                 style={[styles.button, styles.missButton]}
                 onPress={() => handleMiss('3pt')}
-              >
-                <Text style={styles.buttonText}>- Miss</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Free Throws */}
-          <View style={styles.statGroup}>
-            <Text style={styles.statLabel}>Free Throws</Text>
-            <View style={styles.shootingInputRow}>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Made</Text>
-                <TextInput
-                  style={styles.shootingInput}
-                  value={String(freeThrowMade)}
-                  onChangeText={(text) => setFreeThrowMade(parseInt(text) || 0)}
-                  keyboardType="numeric"
-                />
-              </View>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Attempts</Text>
-                <TextInput
-                  style={styles.shootingInput}
-                  value={String(freeThrowAttempts)}
-                  onChangeText={(text) => setFreeThrowAttempts(parseInt(text) || 0)}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-            <View style={styles.quickEntryRow}>
-              <TouchableOpacity 
-                style={[styles.button, styles.makeButton]}
-                onPress={() => handleMake('ft')}
-              >
-                <Text style={styles.buttonText}>+ Make</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.button, styles.missButton]}
-                onPress={() => handleMiss('ft')}
               >
                 <Text style={styles.buttonText}>- Miss</Text>
               </TouchableOpacity>
@@ -790,7 +790,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     backgroundColor: Colors.background,
     borderRadius: 8,
-    padding: 16,
+    padding: 20,
     marginBottom: 12,
     alignItems: 'center',
   },
@@ -802,7 +802,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   summaryCardValue: {
-    fontSize: 20,
+    fontSize: 42,
     fontWeight: '700',
     color: Colors.textPrimary,
   },
