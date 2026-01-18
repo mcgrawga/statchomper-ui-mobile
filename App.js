@@ -25,20 +25,6 @@ export default function App() {
           return;
         }
         console.log('Database initialized');
-        
-        // Reset to initial state: clear all games and reset pro status
-        clearDatabase();
-        console.log('Database cleared');
-        
-        // Reset pro status to false
-        const database = require('./services/database').getDb();
-        database.runSync('UPDATE settings SET isPro = 0 WHERE id = 1');
-        console.log('Pro status reset');
-        
-        // Reseed with initial 3 players
-        seedDatabase();
-        console.log('Database reseeded with initial data');
-        
         console.log('Database setup complete');
         
         // Initialize IAP

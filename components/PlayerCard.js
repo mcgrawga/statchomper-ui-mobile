@@ -116,12 +116,12 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
     Animated.parallel([
       Animated.timing(chevronRotation, {
         toValue: isExpanded ? 1 : 0,
-        duration: 500,
+        duration: 0,
         useNativeDriver: true,
       }),
       Animated.timing(contentHeight, {
         toValue: isExpanded ? 1 : 0,
-        duration: 500,
+        duration: 0,
         useNativeDriver: false,
       }),
     ]).start();

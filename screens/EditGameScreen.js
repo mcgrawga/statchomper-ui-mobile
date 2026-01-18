@@ -128,19 +128,13 @@ export default function EditGameScreen({ navigation, route }) {
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      // Wait 2 seconds, then slide out
+      // Wait briefly, then navigate
       setTimeout(() => {
-        Animated.timing(toastAnim, {
-          toValue: -100,
-          duration: 300,
-          useNativeDriver: true,
-        }).start(() => {
-          setShowToast(false);
-          navigation.navigate('Home', { 
-            expandPlayer: playerName
-          });
+        setShowToast(false);
+        navigation.navigate('Home', { 
+          expandPlayer: playerName
         });
-      }, 2000);
+      }, 700);
     });
   };
 
