@@ -2,17 +2,28 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useIAP } from 'react-native-iap';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
 import { initDatabase, seedDatabase, clearDatabase } from './services/database';
-import { initializeIAP, closeIAP, restorePurchases } from './services/purchases';
+import { PRODUCT_ID, updateProStatus } from './services/purchases';
 import Colors from './constants/Colors';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
+  
+  // Initialize IAP with useIAP hook
+  const {
+    connected,
+    products,
+    getProducts,
+    currentPurchase,
+    finishTransaction,
+    getPurchaseHistory,
+  } = useIAP();
 
   useEffect(() => {
     const setupDatabase = async () => {
@@ -32,15 +43,6 @@ export default function App() {
         console.log('Database seeded with mock data');
         
         console.log('Database setup complete');
-        
-        // Initialize IAP
-        await initializeIAP();
-        console.log('IAP initialized');
-        
-        // Automatically restore purchases on startup
-        const { success, message } = await restorePurchases();
-        console.log('Auto-restore purchases:', message);
-        
         setIsDbReady(true);
       } catch (error) {
         console.error('Failed to initialize database:', error);
@@ -50,12 +52,59 @@ export default function App() {
     };
     
     setupDatabase();
-    
-    // Cleanup IAP connection on unmount
-    return () => {
-      closeIAP();
-    };
   }, []);
+
+  // Load products when IAP connection is ready
+  useEffect(() => {
+    if (connected) {
+      console.log('IAP connected, loading products...');
+      getProducts({ skus: [PRODUCT_ID] });
+    }
+  }, [connected, getProducts]);
+
+  // Handle purchase completion
+  useEffect(() => {
+    const handlePurchase = async () => {
+      if (currentPurchase?.productId === PRODUCT_ID) {
+        try {
+          console.log('Processing purchase:', currentPurchase);
+          
+          // Update pro status in database
+          updateProStatus(true);
+          
+          // Finish the transaction
+          await finishTransaction({ purchase: currentPurchase, isConsumable: false });
+          
+          console.log('Pro version activated successfully');
+        } catch (error) {
+          console.error('Error processing purchase:', error);
+        }
+      }
+    };
+
+    handlePurchase();
+  }, [currentPurchase, finishTransaction]);
+
+  // Auto-restore purchases on startup
+  useEffect(() => {
+    const restorePurchases = async () => {
+      if (connected) {
+        try {
+          const purchaseHistory = await getPurchaseHistory();
+          const proPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
+          
+          if (proPurchase) {
+            updateProStatus(true);
+            console.log('Pro version restored from purchase history');
+          }
+        } catch (error) {
+          console.error('Error restoring purchases:', error);
+        }
+      }
+    };
+
+    restorePurchases();
+  }, [connected, getPurchaseHistory]);
 
   if (!isDbReady) {
     return (

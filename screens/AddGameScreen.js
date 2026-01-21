@@ -16,11 +16,15 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useIAP } from 'react-native-iap';
 import Colors from '../constants/Colors';
 import { getPlayers, addGame } from '../services/database';
-import { checkProStatus, purchaseProVersion } from '../services/purchases';
+import { checkProStatus, PRODUCT_ID, updateProStatus } from '../services/purchases';
 
 export default function AddGameScreen({ navigation }) {
+  // IAP hook
+  const { requestPurchase, currentPurchase, finishTransaction } = useIAP();
+  
   // Form state
   const [player, setPlayer] = useState('');
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
@@ -44,6 +48,37 @@ export default function AddGameScreen({ navigation }) {
     };
     loadPlayers();
   }, []);
+
+  // Handle purchase completion
+  useEffect(() => {
+    const handlePurchase = async () => {
+      if (currentPurchase?.productId === PRODUCT_ID && isPurchasing) {
+        try {
+          console.log('Processing purchase:', currentPurchase);
+          
+          // Update pro status in database
+          updateProStatus(true);
+          
+          // Finish the transaction
+          await finishTransaction({ purchase: currentPurchase, isConsumable: false });
+          
+          Alert.alert('Success!', 'You now have unlimited players!');
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          
+          // Allow them to add new player now
+          setPlayer(ADD_NEW_PLAYER);
+          setShowPlayerPicker(false);
+        } catch (error) {
+          console.error('Error processing purchase:', error);
+          Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+          setIsPurchasing(false);
+        }
+      }
+    };
+
+    handlePurchase();
+  }, [currentPurchase, finishTransaction, isPurchasing]);
   
   // Get unique player names from database
   const ADD_NEW_PLAYER = '+ Add New Player';
@@ -131,21 +166,17 @@ export default function AddGameScreen({ navigation }) {
   const handleUpgrade = async () => {
     setIsPurchasing(true);
     try {
-      const result = await purchaseProVersion();
-      
-      if (result.success) {
-        Alert.alert('Success!', 'You now have unlimited players!');
-        setShowUpgradeModal(false);
-        // Allow them to add new player now
-        setPlayer(ADD_NEW_PLAYER);
-        setShowPlayerPicker(false);
-      } else if (!result.cancelled) {
-        Alert.alert('Purchase Failed', result.message || 'Unable to complete purchase. Please try again.');
-      }
+      await requestPurchase({ sku: PRODUCT_ID });
+      // Purchase completion is handled in useEffect
     } catch (error) {
       console.error('Error during purchase:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
-    } finally {
+      
+      // Handle user cancellation
+      if (error.code === 'E_USER_CANCELLED') {
+        console.log('Purchase cancelled by user');
+      } else {
+        Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase. Please try again.');
+      }
       setIsPurchasing(false);
     }
   };
