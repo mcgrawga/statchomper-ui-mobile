@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "statchomper-ui-mobile",
-    "slug": "statchomper-ui-mobile",
+    "name": "HoopTrack",
+    "slug": "hooptrack",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,17 +13,29 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.hooptrack.app"
     },
     "android": {
+      "package": "com.hooptrack.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "android.permission.INTERNET",
+        "com.android.vending.BILLING"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "228d29db-74f6-43ec-97f3-e58ee71b2567"
+      }
     }
   }
 }

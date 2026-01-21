@@ -12,7 +12,7 @@ try {
 const PRODUCT_ID = 'pro_version';
 
 // Flag to enable test mode (bypasses actual purchase)
-const TEST_MODE = true; // Set to false when ready for production
+const TEST_MODE = false; // Set to false when ready for production
 
 let purchaseUpdateSubscription = null;
 let purchaseErrorSubscription = null;
@@ -115,13 +115,16 @@ export const purchaseProVersion = async () => {
     }
     
     // Real purchase flow
-    const products = await RNIap.getProducts({ skus: [PRODUCT_ID] });
+    const products = await RNIap.getProducts([PRODUCT_ID]);
     
     if (!products || products.length === 0) {
       return { success: false, message: 'Product not found' };
     }
     
-    const purchase = await RNIap.requestPurchase({ sku: PRODUCT_ID });
+    const purchase = await RNIap.requestPurchase({
+      sku: PRODUCT_ID,
+      andDangerouslyFinishTransactionAutomaticallyIOS: false
+    });
     
     return { success: true, message: 'Purchase successful' };
   } catch (error) {

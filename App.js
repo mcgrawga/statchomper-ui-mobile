@@ -25,6 +25,12 @@ export default function App() {
           return;
         }
         console.log('Database initialized');
+        
+        // Temporarily seed database for screenshots
+        clearDatabase();
+        seedDatabase();
+        console.log('Database seeded with mock data');
+        
         console.log('Database setup complete');
         
         // Initialize IAP

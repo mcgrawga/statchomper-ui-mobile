@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>HoopTrack Feature Graphic</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        #canvas-container {
+            display: inline-block;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        #graphic {
+            width: 1044px;
+            height: 520px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .content {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            z-index: 2;
+        }
+        .icon-container {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .icon-container img {
+            width: 150px;
+            height: 150px;
+        }
+        .text-container {
+            color: white;
+        }
+        .app-name {
+            font-size: 120px;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            letter-spacing: -2px;
+        }
+        .tagline {
+            font-size: 32px;
+            font-weight: 600;
+            margin: 10px 0 0 0;
+            opacity: 0.95;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .basketball-icon {
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: -50px;
+            right: -30px;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            max-width: 1024px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+        }
+        button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background: #f7931e;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <div id="graphic">
+            <div class="basketball-icon">🏀</div>
+            <div class="content">
+                <div class="icon-container">
+                    <img src="icon.png" alt="HoopTrack Icon">
+                </div>
+                <div class="text-container">
+                    <h1 class="app-name">HoopTrack</h1>
+                    <p class="tagline">Track Your Player's Stats</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>📸 How to save this as your feature graphic:</h3>
+        <ol>
+            <li>Click the button below to download the image</li>
+            <li>Or take a screenshot of just the orange graphic area (1024x500)</li>
+            <li>Save it as <strong>feature-graphic.png</strong></li>
+            <li>Upload it to Google Play Console</li>
+        </ol>
+        <button onclick="downloadImage()">Download Feature Graphic</button>
+    </div>
+
+    <script>
+        function downloadImage() {
+            // This is a simplified version - you may need to take a screenshot instead
+            alert('Please take a screenshot of the orange graphic above, making sure to capture exactly the 1024x500 area. Save it as feature-graphic.png');
+        }
+    </script>
+</body>
+</html>

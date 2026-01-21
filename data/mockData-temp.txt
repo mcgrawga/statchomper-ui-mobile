@@ -1,7 +1,6 @@
-export const mockGames = 
 [
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-12-05",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -24,7 +23,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-11-20",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -47,7 +46,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-10-29",
     "opponent": "Parkview Bears",
     "boxScore": {
@@ -70,7 +69,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-11-23",
     "opponent": "Lincoln Patriots",
     "boxScore": {
@@ -93,7 +92,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-11-01",
     "opponent": "Madison Bulldogs",
     "boxScore": {
@@ -116,7 +115,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2026-01-05",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -139,7 +138,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-11-18",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -162,7 +161,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-11-01",
     "opponent": "Fairview Trojans",
     "boxScore": {
@@ -185,7 +184,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Jackson",
+    "player": "Jackson Miller",
     "datePlayed": "2025-12-24",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -208,7 +207,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-11-26",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -231,7 +230,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-12-24",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -254,7 +253,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2026-01-12",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -277,7 +276,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-11-25",
     "opponent": "Lakeside Lions",
     "boxScore": {
@@ -300,7 +299,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-11-17",
     "opponent": "Lincoln Patriots",
     "boxScore": {
@@ -323,7 +322,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-12-06",
     "opponent": "Riverside Eagles",
     "boxScore": {
@@ -346,7 +345,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-12-22",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -369,7 +368,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-12-06",
     "opponent": "Lincoln Patriots",
     "boxScore": {
@@ -392,7 +391,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-11-07",
     "opponent": "Jefferson Cougars",
     "boxScore": {
@@ -415,7 +414,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2025-12-26",
     "opponent": "Fairview Trojans",
     "boxScore": {
@@ -438,7 +437,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ethan",
+    "player": "Ethan Davis",
     "datePlayed": "2026-01-01",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -461,7 +460,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Noah",
+    "player": "Noah Wilson",
     "datePlayed": "2025-11-08",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -484,7 +483,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Noah",
+    "player": "Noah Wilson",
     "datePlayed": "2025-11-02",
     "opponent": "Valley View Falcons",
     "boxScore": {
@@ -507,7 +506,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Noah",
+    "player": "Noah Wilson",
     "datePlayed": "2025-11-24",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -530,7 +529,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Noah",
+    "player": "Noah Wilson",
     "datePlayed": "2025-12-21",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -553,7 +552,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Noah",
+    "player": "Noah Wilson",
     "datePlayed": "2026-01-01",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -576,7 +575,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-12-19",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -599,7 +598,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-11-20",
     "opponent": "Madison Bulldogs",
     "boxScore": {
@@ -622,7 +621,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-11-14",
     "opponent": "Madison Bulldogs",
     "boxScore": {
@@ -645,7 +644,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-12-03",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -668,7 +667,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-12-07",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -691,7 +690,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-12-08",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -714,7 +713,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2026-01-10",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -737,7 +736,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-11-02",
     "opponent": "Madison Bulldogs",
     "boxScore": {
@@ -760,7 +759,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-12-29",
     "opponent": "Westfield Panthers",
     "boxScore": {
@@ -783,7 +782,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-11-12",
     "opponent": "Valley View Falcons",
     "boxScore": {
@@ -806,7 +805,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2025-10-27",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -829,7 +828,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Liam",
+    "player": "Liam Anderson",
     "datePlayed": "2026-01-08",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -852,7 +851,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2026-01-04",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -875,7 +874,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2026-01-02",
     "opponent": "Lakeside Lions",
     "boxScore": {
@@ -898,7 +897,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2025-12-06",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -921,7 +920,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2025-12-01",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -944,7 +943,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2025-12-07",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -967,7 +966,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2025-11-12",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -990,7 +989,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Mason",
+    "player": "Mason Taylor",
     "datePlayed": "2025-10-28",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -1013,7 +1012,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2025-11-22",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -1036,7 +1035,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2026-01-12",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -1059,7 +1058,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2025-12-04",
     "opponent": "Parkview Bears",
     "boxScore": {
@@ -1082,7 +1081,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2025-12-17",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -1105,7 +1104,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2025-12-14",
     "opponent": "Lincoln Patriots",
     "boxScore": {
@@ -1128,7 +1127,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Lucas",
+    "player": "Lucas Brown",
     "datePlayed": "2025-11-06",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -1151,7 +1150,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-10-30",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1174,7 +1173,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-11-14",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1197,7 +1196,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2026-01-02",
     "opponent": "Westfield Panthers",
     "boxScore": {
@@ -1220,7 +1219,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-22",
     "opponent": "Westfield Panthers",
     "boxScore": {
@@ -1243,7 +1242,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-31",
     "opponent": "Riverside Eagles",
     "boxScore": {
@@ -1266,7 +1265,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-04",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -1289,7 +1288,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-10-31",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1312,7 +1311,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-23",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -1335,7 +1334,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-26",
     "opponent": "Jefferson Cougars",
     "boxScore": {
@@ -1358,7 +1357,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-11",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -1381,7 +1380,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2026-01-13",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -1404,7 +1403,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Olivia",
+    "player": "Olivia Garcia",
     "datePlayed": "2025-12-29",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1427,7 +1426,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2026-01-09",
     "opponent": "Lincoln Patriots",
     "boxScore": {
@@ -1450,7 +1449,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2025-11-04",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -1473,7 +1472,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2025-10-27",
     "opponent": "Lakeside Lions",
     "boxScore": {
@@ -1496,7 +1495,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2025-10-23",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -1519,7 +1518,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2025-10-31",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -1542,7 +1541,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2026-01-18",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1565,7 +1564,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Sophia",
+    "player": "Sophia Martinez",
     "datePlayed": "2025-12-19",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -1588,7 +1587,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2026-01-18",
     "opponent": "Summit Spartans",
     "boxScore": {
@@ -1611,7 +1610,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-12-11",
     "opponent": "Valley View Falcons",
     "boxScore": {
@@ -1634,7 +1633,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-12-22",
     "opponent": "Jefferson Cougars",
     "boxScore": {
@@ -1657,7 +1656,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-10-29",
     "opponent": "Riverside Eagles",
     "boxScore": {
@@ -1680,7 +1679,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-11-19",
     "opponent": "Parkview Bears",
     "boxScore": {
@@ -1703,7 +1702,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-11-21",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1726,7 +1725,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-11-26",
     "opponent": "Mountain Vista Hawks",
     "boxScore": {
@@ -1749,7 +1748,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Emma",
+    "player": "Emma Rodriguez",
     "datePlayed": "2025-11-23",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -1772,7 +1771,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-12-18",
     "opponent": "Twin Pines Wildcats",
     "boxScore": {
@@ -1795,7 +1794,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-12-05",
     "opponent": "Oakwood Knights",
     "boxScore": {
@@ -1818,7 +1817,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2026-01-07",
     "opponent": "Jefferson Cougars",
     "boxScore": {
@@ -1841,7 +1840,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-12-27",
     "opponent": "Central Dragons",
     "boxScore": {
@@ -1864,7 +1863,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-10-24",
     "opponent": "Riverside Eagles",
     "boxScore": {
@@ -1887,7 +1886,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-10-22",
     "opponent": "Fairview Trojans",
     "boxScore": {
@@ -1910,7 +1909,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-12-05",
     "opponent": "Greenwood Wolves",
     "boxScore": {
@@ -1933,7 +1932,7 @@ export const mockGames =
     }
   },
   {
-    "player": "Ava",
+    "player": "Ava Thompson",
     "datePlayed": "2025-12-18",
     "opponent": "Hillside Tigers",
     "boxScore": {
@@ -1956,4 +1955,3 @@ export const mockGames =
     }
   }
 ]
-;
