@@ -166,7 +166,7 @@ export default function AddGameScreen({ navigation }) {
   const handleUpgrade = async () => {
     setIsPurchasing(true);
     try {
-      await requestPurchase({ sku: PRODUCT_ID });
+      await requestPurchase({ skus: [PRODUCT_ID] });
       // Purchase completion is handled in useEffect
     } catch (error) {
       console.error('Error during purchase:', error);
