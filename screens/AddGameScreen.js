@@ -52,7 +52,7 @@ export default function AddGameScreen({ navigation }) {
   // Handle purchase completion
   useEffect(() => {
     const handlePurchase = async () => {
-      if (currentPurchase?.productId === PRODUCT_ID && isPurchasing) {
+      if (currentPurchase?.productId === PRODUCT_ID && isPurchasing && finishTransaction) {
         try {
           console.log('Processing purchase:', currentPurchase);
           
@@ -78,7 +78,7 @@ export default function AddGameScreen({ navigation }) {
     };
 
     handlePurchase();
-  }, [currentPurchase, finishTransaction, isPurchasing]);
+  }, [currentPurchase, isPurchasing]);
   
   // Get unique player names from database
   const ADD_NEW_PLAYER = '+ Add New Player';

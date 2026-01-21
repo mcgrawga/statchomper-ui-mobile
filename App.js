@@ -14,8 +14,17 @@ const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
+  const [iapError, setIapError] = useState(null);
   
-  // Initialize IAP with useIAP hook
+  // Initialize IAP with useIAP hook - wrap in try/catch for safety
+  let iapHook = { connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} };
+  try {
+    iapHook = useIAP();
+  } catch (error) {
+    console.error('IAP initialization error:', error);
+    setIapError(error);
+  }
+  
   const {
     connected,
     products,
@@ -23,7 +32,7 @@ export default function App() {
     currentPurchase,
     finishTransaction,
     getPurchaseHistory,
-  } = useIAP();
+  } = iapHook;
 
   useEffect(() => {
     const setupDatabase = async () => {
@@ -56,16 +65,20 @@ export default function App() {
 
   // Load products when IAP connection is ready
   useEffect(() => {
-    if (connected) {
-      console.log('IAP connected, loading products...');
-      getProducts({ skus: [PRODUCT_ID] });
+    if (connected && getProducts) {
+      try {
+        console.log('IAP connected, loading products...');
+        getProducts([PRODUCT_ID]);
+      } catch (error) {
+        console.error('Error loading products:', error);
+      }
     }
-  }, [connected, getProducts]);
+  }, [connected]);
 
   // Handle purchase completion
   useEffect(() => {
     const handlePurchase = async () => {
-      if (currentPurchase?.productId === PRODUCT_ID) {
+      if (currentPurchase?.productId === PRODUCT_ID && finishTransaction) {
         try {
           console.log('Processing purchase:', currentPurchase);
           
@@ -83,12 +96,12 @@ export default function App() {
     };
 
     handlePurchase();
-  }, [currentPurchase, finishTransaction]);
+  }, [currentPurchase]);
 
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
-      if (connected) {
+      if (connected && getPurchaseHistory) {
         try {
           const purchaseHistory = await getPurchaseHistory();
           const proPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
@@ -104,7 +117,7 @@ export default function App() {
     };
 
     restorePurchases();
-  }, [connected, getPurchaseHistory]);
+  }, [connected]);
 
   if (!isDbReady) {
     return (
