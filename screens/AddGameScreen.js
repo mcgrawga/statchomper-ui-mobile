@@ -33,9 +33,6 @@ if (!isExpoGo) {
 }
 
 export default function AddGameScreen({ navigation }) {
-  // IAP hook
-  const { requestPurchase, currentPurchase, finishTransaction } = useIAP();
-  
   // Form state
   const [player, setPlayer] = useState('');
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
@@ -54,6 +51,52 @@ export default function AddGameScreen({ navigation }) {
   // Ref for new player name input
   const newPlayerNameRef = useRef(null);
   
+  // Ref to track if we're expecting a purchase result
+  const expectingPurchaseRef = useRef(false);
+  
+  // IAP hook with callbacks for purchase handling
+  const { requestPurchase, finishTransaction, getAvailablePurchases } = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      console.log('Purchase success callback:', purchase);
+      if (purchase?.productId === PRODUCT_ID && expectingPurchaseRef.current) {
+        try {
+          // Update pro status in database
+          updateProStatus(true);
+          
+          // Finish the transaction
+          await finishTransaction({ purchase, isConsumable: false });
+          
+          Alert.alert('Success!', 'You now have unlimited players!');
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          
+          // Allow them to add new player now
+          setPlayer('+ Add New Player');
+        } catch (error) {
+          console.error('Error finishing transaction:', error);
+          // Still grant pro since purchase succeeded
+          updateProStatus(true);
+          Alert.alert('Success!', 'You now have unlimited players!');
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          setPlayer('+ Add New Player');
+        }
+      }
+    },
+    onPurchaseError: (error) => {
+      console.log('Purchase error callback:', error);
+      if (expectingPurchaseRef.current) {
+        if (error.code !== 'E_USER_CANCELLED') {
+          Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase.');
+        }
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+      }
+    },
+  });
+  
   // Load players from database
   useEffect(() => {
     const loadPlayers = () => {
@@ -62,37 +105,6 @@ export default function AddGameScreen({ navigation }) {
     };
     loadPlayers();
   }, []);
-
-  // Handle purchase completion
-  useEffect(() => {
-    const handlePurchase = async () => {
-      if (currentPurchase?.productId === PRODUCT_ID && isPurchasing && finishTransaction) {
-        try {
-          console.log('Processing purchase:', currentPurchase);
-          
-          // Update pro status in database
-          updateProStatus(true);
-          
-          // Finish the transaction
-          await finishTransaction({ purchase: currentPurchase, isConsumable: false });
-          
-          Alert.alert('Success!', 'You now have unlimited players!');
-          setShowUpgradeModal(false);
-          setIsPurchasing(false);
-          
-          // Allow them to add new player now
-          setPlayer(ADD_NEW_PLAYER);
-          setShowPlayerPicker(false);
-        } catch (error) {
-          console.error('Error processing purchase:', error);
-          Alert.alert('Error', 'An unexpected error occurred. Please try again.');
-          setIsPurchasing(false);
-        }
-      }
-    };
-
-    handlePurchase();
-  }, [currentPurchase, isPurchasing]);
   
   // Get unique player names from database
   const ADD_NEW_PLAYER = '+ Add New Player';
@@ -183,6 +195,7 @@ export default function AddGameScreen({ navigation }) {
 
   const handleUpgrade = async () => {
     setIsPurchasing(true);
+    expectingPurchaseRef.current = true;
     try {
       await requestPurchase({
         request: {
@@ -192,17 +205,43 @@ export default function AddGameScreen({ navigation }) {
         },
         type: 'in-app',
       });
-      // Purchase completion is handled in useEffect
+      // Purchase completion is handled via onPurchaseSuccess callback
     } catch (error) {
       console.error('Error during purchase:', error);
       
       // Handle user cancellation
       if (error.code === 'E_USER_CANCELLED') {
         console.log('Purchase cancelled by user');
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+      } else if (error.message?.includes('already owned') || error.code === 'E_ALREADY_OWNED') {
+        // User already owns this - restore their purchase
+        console.log('Item already owned, restoring purchase...');
+        try {
+          const purchases = await getAvailablePurchases();
+          const proPurchase = purchases?.find(p => p.productId === PRODUCT_ID);
+          if (proPurchase) {
+            await finishTransaction({ purchase: proPurchase, isConsumable: false });
+          }
+          updateProStatus(true);
+          Alert.alert('Restored!', 'Your Pro purchase has been restored.');
+          setShowUpgradeModal(false);
+          setPlayer(ADD_NEW_PLAYER);
+        } catch (restoreError) {
+          console.error('Error restoring purchase:', restoreError);
+          // Still grant pro status since they own it
+          updateProStatus(true);
+          Alert.alert('Restored!', 'Your Pro purchase has been restored.');
+          setShowUpgradeModal(false);
+          setPlayer(ADD_NEW_PLAYER);
+        }
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
       } else {
         Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase. Please try again.');
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
       }
-      setIsPurchasing(false);
     }
   };
 
