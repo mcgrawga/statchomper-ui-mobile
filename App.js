@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
-import { initDatabase, seedDatabase, clearDatabase } from './services/database';
+import { initDatabase } from './services/database';
 import { PRODUCT_ID, updateProStatus } from './services/purchases';
 import Colors from './constants/Colors';
 
@@ -47,12 +47,6 @@ export default function App() {
           return;
         }
         console.log('Database initialized');
-        
-        // Temporarily seed database for screenshots
-        clearDatabase();
-        seedDatabase();
-        console.log('Database seeded with mock data');
-        
         console.log('Database setup complete');
         setIsDbReady(true);
       } catch (error) {
