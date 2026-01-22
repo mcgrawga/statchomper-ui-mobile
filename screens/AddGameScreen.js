@@ -16,10 +16,21 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useIAP } from 'react-native-iap';
+import Constants from 'expo-constants';
 import Colors from '../constants/Colors';
 import { getPlayers, addGame } from '../services/database';
 import { checkProStatus, PRODUCT_ID, updateProStatus } from '../services/purchases';
+
+// Only import useIAP if not in Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
+let useIAP = () => ({ requestPurchase: () => {}, currentPurchase: null, finishTransaction: () => {} });
+if (!isExpoGo) {
+  try {
+    useIAP = require('react-native-iap').useIAP;
+  } catch (e) {
+    console.log('IAP not available:', e.message);
+  }
+}
 
 export default function AddGameScreen({ navigation }) {
   // IAP hook
@@ -39,6 +50,9 @@ export default function AddGameScreen({ navigation }) {
   // Toast notification state
   const [showToast, setShowToast] = useState(false);
   const toastAnim = useRef(new Animated.Value(-100)).current;
+  
+  // Ref for new player name input
+  const newPlayerNameRef = useRef(null);
   
   // Load players from database
   useEffect(() => {
@@ -155,6 +169,10 @@ export default function AddGameScreen({ navigation }) {
         // Allow adding new player
         setPlayer(selectedPlayer);
         setShowPlayerPicker(false);
+        // Focus the new player name input after a brief delay
+        setTimeout(() => {
+          newPlayerNameRef.current?.focus();
+        }, 100);
       }
     } else {
       // Select existing player
@@ -325,6 +343,7 @@ export default function AddGameScreen({ navigation }) {
             <>
               <Text style={styles.label}>New Player Name *</Text>
               <TextInput
+                ref={newPlayerNameRef}
                 style={styles.input}
                 value={newPlayerName}
                 onChangeText={setNewPlayerName}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useIAP } from 'react-native-iap';
+import Constants from 'expo-constants';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
@@ -10,21 +10,23 @@ import { initDatabase, seedDatabase, clearDatabase } from './services/database';
 import { PRODUCT_ID, updateProStatus } from './services/purchases';
 import Colors from './constants/Colors';
 
+// Only import useIAP if not in Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} });
+if (!isExpoGo) {
+  try {
+    useIAP = require('react-native-iap').useIAP;
+  } catch (e) {
+    console.log('IAP not available:', e.message);
+  }
+}
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [isDbReady, setIsDbReady] = useState(false);
-  const [iapError, setIapError] = useState(null);
   
-  // Initialize IAP with useIAP hook - wrap in try/catch for safety
-  let iapHook = { connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} };
-  try {
-    iapHook = useIAP();
-  } catch (error) {
-    console.error('IAP initialization error:', error);
-    setIapError(error);
-  }
-  
+  // Initialize IAP with useIAP hook
   const {
     connected,
     products,
@@ -32,7 +34,7 @@ export default function App() {
     currentPurchase,
     finishTransaction,
     getPurchaseHistory,
-  } = iapHook;
+  } = useIAP();
 
   useEffect(() => {
     const setupDatabase = async () => {
