@@ -1,5 +1,4 @@
 import * as SQLite from 'expo-sqlite';
-import { mockGames } from '../data/mockData';
 
 let db;
 
@@ -81,69 +80,15 @@ export const clearDatabase = () => {
     const database = getDb();
     const result = database.runSync('DELETE FROM games');
     console.log(`Cleared ${result.changes} games from database`);
+    
+    // Reset pro status
+    database.runSync('UPDATE settings SET isPro = 0 WHERE id = 1');
+    console.log('Reset pro status to free');
+    
     return result.changes;
   } catch (error) {
     console.error('Error clearing database:', error);
     throw error;
-  }
-};
-
-// Seed database with mock data
-export const seedDatabase = () => {
-  try {
-    const database = getDb();
-    
-    // Check if database is already seeded
-    const result = database.getFirstSync('SELECT COUNT(*) as count FROM games');
-    
-    if (result && result.count > 0) {
-      console.log('Database already seeded with', result.count, 'games');
-      return;
-    }
-    
-    console.log('Seeding database with', mockGames.length, 'games...');
-    
-    // Insert mock data using individual insert statements
-    let successCount = 0;
-    mockGames.forEach((game, index) => {
-      try {
-        database.runSync(
-          `INSERT INTO games (
-            player, datePlayed, opponent, points,
-            twoPointMade, twoPointAttempts, twoPointPercentage,
-            threePointMade, threePointAttempts, threePointPercentage,
-            freeThrowMade, freeThrowAttempts, freeThrowPercentage,
-            rebounds, assists, steals, blocks, turnovers, fouls
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          game.player,
-          game.datePlayed,
-          game.opponent,
-          game.boxScore.points,
-          game.boxScore.twoPointMade,
-          game.boxScore.twoPointAttempts,
-          game.boxScore.twoPointPercentage.toString(),
-          game.boxScore.threePointMade,
-          game.boxScore.threePointAttempts,
-          game.boxScore.threePointPercentage.toString(),
-          game.boxScore.freeThrowMade,
-          game.boxScore.freeThrowAttempts,
-          game.boxScore.freeThrowPercentage.toString(),
-          game.boxScore.rebounds,
-          game.boxScore.assists,
-          game.boxScore.steals,
-          game.boxScore.blocks,
-          game.boxScore.turnovers,
-          game.boxScore.fouls
-        );
-        successCount++;
-      } catch (insertError) {
-        console.error(`Error inserting game ${index + 1}:`, insertError);
-      }
-    });
-    
-    console.log(`Database seeded successfully with ${successCount} of ${mockGames.length} games`);
-  } catch (error) {
-    console.error('Error seeding database:', error);
   }
 };
 

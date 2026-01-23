@@ -23,7 +23,27 @@ import { checkProStatus, PRODUCT_ID, updateProStatus } from '../services/purchas
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
-let useIAP = () => ({ requestPurchase: () => {}, currentPurchase: null, finishTransaction: () => {} });
+
+// Mock useIAP for Expo Go that simulates a purchase
+let useIAP = ({ onPurchaseSuccess, onPurchaseError } = {}) => ({
+  requestPurchase: async () => {
+    // Simulate purchase flow in Expo Go
+    console.log('[Expo Go] Simulating IAP purchase...');
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+    // Trigger success callback with mock purchase
+    if (onPurchaseSuccess) {
+      onPurchaseSuccess({ productId: PRODUCT_ID, transactionId: 'expo-test-' + Date.now() });
+    }
+  },
+  finishTransaction: async () => {
+    console.log('[Expo Go] Simulating finish transaction');
+  },
+  getAvailablePurchases: async () => {
+    console.log('[Expo Go] Simulating get available purchases');
+    return [];
+  },
+});
+
 if (!isExpoGo) {
   try {
     useIAP = require('react-native-iap').useIAP;
@@ -66,22 +86,44 @@ export default function AddGameScreen({ navigation }) {
           // Finish the transaction
           await finishTransaction({ purchase, isConsumable: false });
           
-          Alert.alert('Success!', 'You now have unlimited players!');
           setShowUpgradeModal(false);
           setIsPurchasing(false);
           expectingPurchaseRef.current = false;
           
           // Allow them to add new player now
           setPlayer('+ Add New Player');
+          
+          // Show alert and focus input after dismissal
+          Alert.alert('Success!', 'You now have unlimited players!', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
+            },
+          ]);
         } catch (error) {
           console.error('Error finishing transaction:', error);
           // Still grant pro since purchase succeeded
           updateProStatus(true);
-          Alert.alert('Success!', 'You now have unlimited players!');
           setShowUpgradeModal(false);
           setIsPurchasing(false);
           expectingPurchaseRef.current = false;
           setPlayer('+ Add New Player');
+          
+          // Show alert and focus input after dismissal
+          Alert.alert('Success!', 'You now have unlimited players!', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
+            },
+          ]);
         }
       }
     },

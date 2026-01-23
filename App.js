@@ -12,7 +12,7 @@ import Colors from './constants/Colors';
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
-let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} });
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {}, getAvailablePurchases: () => {} });
 if (!isExpoGo) {
   try {
     useIAP = require('react-native-iap').useIAP;
@@ -34,6 +34,7 @@ export default function App() {
     currentPurchase,
     finishTransaction,
     getPurchaseHistory,
+    getAvailablePurchases,
   } = useIAP();
 
   useEffect(() => {
@@ -97,14 +98,16 @@ export default function App() {
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
-      if (connected && getPurchaseHistory) {
+      if (connected && getAvailablePurchases) {
         try {
-          const purchaseHistory = await getPurchaseHistory();
-          const proPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
+          console.log('Checking for existing purchases...');
+          const availablePurchases = await getAvailablePurchases();
+          console.log('Available purchases:', availablePurchases);
+          const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
           
           if (proPurchase) {
             updateProStatus(true);
-            console.log('Pro version restored from purchase history');
+            console.log('Pro version restored from available purchases');
           }
         } catch (error) {
           console.error('Error restoring purchases:', error);
