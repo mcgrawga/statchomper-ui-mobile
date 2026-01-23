@@ -100,14 +100,15 @@ export default function App() {
     const restorePurchases = async () => {
       if (connected && getAvailablePurchases) {
         try {
-          console.log('Checking for existing purchases...');
+          console.log('Checking Google Play for existing purchases...');
           const availablePurchases = await getAvailablePurchases();
           console.log('Available purchases:', availablePurchases);
           const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
           
           if (proPurchase) {
+            console.log('Pro purchase found on Google Play, updating database...');
             updateProStatus(true);
-            console.log('Pro version restored from available purchases');
+            console.log('Pro version restored and database updated');
           }
         } catch (error) {
           console.error('Error restoring purchases:', error);
