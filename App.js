@@ -98,20 +98,23 @@ export default function App() {
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
+      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases);
       if (connected && getAvailablePurchases) {
         try {
-          console.log('Checking Google Play for existing purchases...');
+          console.log('[AUTO-RESTORE] Checking Google Play for existing purchases...');
           const availablePurchases = await getAvailablePurchases();
-          console.log('Available purchases:', availablePurchases);
+          console.log('[AUTO-RESTORE] Available purchases:', JSON.stringify(availablePurchases));
           const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
           
           if (proPurchase) {
-            console.log('Pro purchase found on Google Play, updating database...');
+            console.log('[AUTO-RESTORE] Pro purchase found on Google Play, updating database...');
             updateProStatus(true);
-            console.log('Pro version restored and database updated');
+            console.log('[AUTO-RESTORE] Pro version restored and database updated');
+          } else {
+            console.log('[AUTO-RESTORE] No pro purchase found');
           }
         } catch (error) {
-          console.error('Error restoring purchases:', error);
+          console.error('[AUTO-RESTORE] Error restoring purchases:', error);
         }
       }
     };

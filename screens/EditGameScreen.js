@@ -231,16 +231,23 @@ export default function EditGameScreen({ navigation, route }) {
       });
       // Purchase completion is handled via onPurchaseSuccess callback
     } catch (error) {
-      console.error('Error during purchase:', error);
+      console.error('[PURCHASE] Error:', error);
+      console.error('[PURCHASE] Error code:', error.code);
+      console.error('[PURCHASE] Error message:', error.message);
+      
+      const errorMessage = (error.message || '').toLowerCase();
       
       // Handle user cancellation
       if (error.code === 'E_USER_CANCELLED') {
-        console.log('Purchase cancelled by user');
+        console.log('[PURCHASE] Purchase cancelled by user');
         setIsPurchasing(false);
         expectingPurchaseRef.current = false;
-      } else if (error.message?.includes('already owned') || error.code === 'E_ALREADY_OWNED') {
+      } else if (
+        errorMessage.includes('already own') || 
+        error.code === 'E_ALREADY_OWNED'
+      ) {
         // User already owns this - grant pro status and proceed
-        console.log('Item already owned, granting pro status...');
+        console.log('[PURCHASE] Item already owned, granting pro status...');
         updateProStatus(true);
         setShowUpgradeModal(false);
         setIsPurchasing(false);
