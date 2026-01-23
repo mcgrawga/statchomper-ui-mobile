@@ -257,28 +257,24 @@ export default function AddGameScreen({ navigation }) {
         setIsPurchasing(false);
         expectingPurchaseRef.current = false;
       } else if (error.message?.includes('already owned') || error.code === 'E_ALREADY_OWNED') {
-        // User already owns this - restore their purchase
-        console.log('Item already owned, restoring purchase...');
-        try {
-          const purchases = await getAvailablePurchases();
-          const proPurchase = purchases?.find(p => p.productId === PRODUCT_ID);
-          if (proPurchase) {
-            await finishTransaction({ purchase: proPurchase, isConsumable: false });
-          }
-          updateProStatus(true);
-          Alert.alert('Restored!', 'Your Pro purchase has been restored.');
-          setShowUpgradeModal(false);
-          setPlayer(ADD_NEW_PLAYER);
-        } catch (restoreError) {
-          console.error('Error restoring purchase:', restoreError);
-          // Still grant pro status since they own it
-          updateProStatus(true);
-          Alert.alert('Restored!', 'Your Pro purchase has been restored.');
-          setShowUpgradeModal(false);
-          setPlayer(ADD_NEW_PLAYER);
-        }
+        // User already owns this - grant pro status and proceed
+        console.log('Item already owned, granting pro status...');
+        updateProStatus(true);
+        setShowUpgradeModal(false);
         setIsPurchasing(false);
         expectingPurchaseRef.current = false;
+        setPlayer(ADD_NEW_PLAYER);
+        
+        Alert.alert('Restored!', 'Your Pro purchase has been restored.', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setTimeout(() => {
+                newPlayerNameRef.current?.focus();
+              }, 100);
+            },
+          },
+        ]);
       } else {
         Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase. Please try again.');
         setIsPurchasing(false);

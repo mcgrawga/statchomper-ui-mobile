@@ -16,8 +16,41 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Constants from 'expo-constants';
 import Colors from '../constants/Colors';
 import { getPlayers, updateGame } from '../services/database';
+import { checkProStatus, PRODUCT_ID, updateProStatus } from '../services/purchases';
+
+// Only import useIAP if not in Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// Mock useIAP for Expo Go that simulates a purchase
+let useIAP = ({ onPurchaseSuccess, onPurchaseError } = {}) => ({
+  requestPurchase: async () => {
+    // Simulate purchase flow in Expo Go
+    console.log('[Expo Go] Simulating IAP purchase...');
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+    // Trigger success callback with mock purchase
+    if (onPurchaseSuccess) {
+      onPurchaseSuccess({ productId: PRODUCT_ID, transactionId: 'expo-test-' + Date.now() });
+    }
+  },
+  finishTransaction: async () => {
+    console.log('[Expo Go] Simulating finish transaction');
+  },
+  getAvailablePurchases: async () => {
+    console.log('[Expo Go] Simulating get available purchases');
+    return [];
+  },
+});
+
+if (!isExpoGo) {
+  try {
+    useIAP = require('react-native-iap').useIAP;
+  } catch (e) {
+    console.log('IAP not available:', e.message);
+  }
+}
 
 export default function EditGameScreen({ navigation, route }) {
   const { game } = route.params;
@@ -25,23 +58,104 @@ export default function EditGameScreen({ navigation, route }) {
   // Form state - Initialize with game data
   const [player, setPlayer] = useState(game.player);
   const [showPlayerPicker, setShowPlayerPicker] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [date, setDate] = useState(new Date(game.datePlayed));
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [opponent, setOpponent] = useState(game.opponent);
   const [players, setPlayers] = useState([]);
+  const [isPurchasing, setIsPurchasing] = useState(false);
   
   // Toast notification state
   const [showToast, setShowToast] = useState(false);
   const toastAnim = useRef(new Animated.Value(-100)).current;
   
+  // Ref for new player name input
+  const newPlayerNameRef = useRef(null);
+  
+  // Ref to track if we're expecting a purchase result
+  const expectingPurchaseRef = useRef(false);
+  
+  // IAP hook with callbacks for purchase handling
+  const { requestPurchase, finishTransaction, getAvailablePurchases } = useIAP({
+    onPurchaseSuccess: async (purchase) => {
+      console.log('Purchase success callback:', purchase);
+      if (purchase?.productId === PRODUCT_ID && expectingPurchaseRef.current) {
+        try {
+          // Update pro status in database
+          updateProStatus(true);
+          
+          // Finish the transaction
+          await finishTransaction({ purchase, isConsumable: false });
+          
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          
+          // Allow them to add new player now
+          setPlayer('+ Add New Player');
+          
+          // Show alert and focus input after dismissal
+          Alert.alert('Success!', 'You now have unlimited players!', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
+            },
+          ]);
+        } catch (error) {
+          console.error('Error finishing transaction:', error);
+          // Still grant pro since purchase succeeded
+          updateProStatus(true);
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          setPlayer('+ Add New Player');
+          
+          // Show alert and focus input after dismissal
+          Alert.alert('Success!', 'You now have unlimited players!', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
+            },
+          ]);
+        }
+      }
+    },
+    onPurchaseError: (error) => {
+      console.log('Purchase error callback:', error);
+      if (expectingPurchaseRef.current) {
+        if (error.code !== 'E_USER_CANCELLED') {
+          Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase.');
+        }
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+      }
+    },
+  });
+  
   // Load players from database
   useEffect(() => {
     const loadPlayers = () => {
-      const dbPlayers = getPlayers();
-      setPlayers(dbPlayers);
+      try {
+        const dbPlayers = getPlayers();
+        setPlayers(dbPlayers || []);
+      } catch (error) {
+        console.error('Error getting players:', error);
+        setPlayers([]);
+      }
     };
-    loadPlayers();
+    
+    // Small delay to ensure database is ready
+    const timer = setTimeout(loadPlayers, 100);
+    return () => clearTimeout(timer);
   }, []);
   
   // Get unique player names from database
@@ -76,6 +190,81 @@ export default function EditGameScreen({ navigation, route }) {
     if (attempts === 0) return 'n/a';
     return Math.round((made / attempts) * 100) + '%';
   };
+
+  const handlePlayerSelect = (selectedPlayer) => {
+    if (selectedPlayer === ADD_NEW_PLAYER) {
+      // Check if user can add new player
+      const isPro = checkProStatus();
+      const playerCount = players.length;
+      
+      if (playerCount >= 3 && !isPro) {
+        // Show upgrade modal
+        setShowPlayerPicker(false);
+        setShowUpgradeModal(true);
+      } else {
+        // Allow adding new player
+        setPlayer(selectedPlayer);
+        setShowPlayerPicker(false);
+        // Focus the new player name input after a brief delay
+        setTimeout(() => {
+          newPlayerNameRef.current?.focus();
+        }, 100);
+      }
+    } else {
+      // Select existing player
+      setPlayer(selectedPlayer);
+      setShowPlayerPicker(false);
+    }
+  };
+
+  const handleUpgrade = async () => {
+    setIsPurchasing(true);
+    expectingPurchaseRef.current = true;
+    try {
+      await requestPurchase({
+        request: {
+          android: {
+            skus: [PRODUCT_ID],
+          },
+        },
+        type: 'in-app',
+      });
+      // Purchase completion is handled via onPurchaseSuccess callback
+    } catch (error) {
+      console.error('Error during purchase:', error);
+      
+      // Handle user cancellation
+      if (error.code === 'E_USER_CANCELLED') {
+        console.log('Purchase cancelled by user');
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+      } else if (error.message?.includes('already owned') || error.code === 'E_ALREADY_OWNED') {
+        // User already owns this - grant pro status and proceed
+        console.log('Item already owned, granting pro status...');
+        updateProStatus(true);
+        setShowUpgradeModal(false);
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+        setPlayer(ADD_NEW_PLAYER);
+        
+        Alert.alert('Restored!', 'Your Pro purchase has been restored.', [
+          {
+            text: 'OK',
+            onPress: () => {
+              setTimeout(() => {
+                newPlayerNameRef.current?.focus();
+              }, 100);
+            },
+          },
+        ]);
+      } else {
+        Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase. Please try again.');
+        setIsPurchasing(false);
+        expectingPurchaseRef.current = false;
+      }
+    }
+  };
+
 
   // Quick-entry functions
   const handleMake = (type) => {
@@ -242,6 +431,7 @@ export default function EditGameScreen({ navigation, route }) {
             <>
               <Text style={styles.label}>New Player Name *</Text>
               <TextInput
+                ref={newPlayerNameRef}
                 style={styles.input}
                 value={newPlayerName}
                 onChangeText={setNewPlayerName}
@@ -482,10 +672,7 @@ export default function EditGameScreen({ navigation, route }) {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.playerOption}
-                  onPress={() => {
-                    setPlayer(item);
-                    setShowPlayerPicker(false);
-                  }}
+                  onPress={() => handlePlayerSelect(item)}
                 >
                   <Text style={styles.playerOptionText}>{item}</Text>
                   {player === item && (
@@ -494,6 +681,64 @@ export default function EditGameScreen({ navigation, route }) {
                 </TouchableOpacity>
               )}
             />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Upgrade Modal */}
+      <Modal
+        visible={showUpgradeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowUpgradeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.upgradeModalContent}>
+            <View style={styles.upgradeHeader}>
+              <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
+              <Text style={styles.upgradePrice}>$6.99</Text>
+            </View>
+            
+            <View style={styles.upgradeBody}>
+              <View style={styles.limitMessage}>
+                <Text style={styles.limitIcon}>🏀</Text>
+                <Text style={styles.limitText}>
+                  Free version is limited to 3 players
+                </Text>
+              </View>
+              
+              <View style={styles.benefitsSection}>
+                <Text style={styles.benefitsTitle}>Pro Benefits:</Text>
+                <View style={styles.benefitItem}>
+                  <Text style={styles.benefitIcon}>✓</Text>
+                  <Text style={styles.benefitText}>Unlimited players</Text>
+                </View>
+                <View style={styles.benefitItem}>
+                  <Text style={styles.benefitIcon}>✓</Text>
+                  <Text style={styles.benefitText}>One-time purchase</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.upgradeActions}>
+              <TouchableOpacity
+                style={styles.upgradeButton}
+                onPress={handleUpgrade}
+                disabled={isPurchasing}
+              >
+                <Text style={styles.upgradeButtonText}>
+                  {isPurchasing ? 'Processing...' : 'Upgrade Now'}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.cancelUpgradeButton}
+                onPress={() => setShowUpgradeModal(false)}
+                disabled={isPurchasing}
+              >
+                <Text style={styles.cancelUpgradeText}>Maybe Later</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -644,7 +889,8 @@ const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
     backgroundColor: Colors.cardBackground,
@@ -871,5 +1117,108 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     flex: 1,
+  },
+  upgradeModalContent: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 16,
+    width: '85%',
+    maxWidth: 400,
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  upgradeHeader: {
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+  },
+  upgradeTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  upgradePrice: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+  upgradeBody: {
+    padding: 24,
+  },
+  limitMessage: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  limitIcon: {
+    fontSize: 24,
+    marginRight: 12,
+  },
+  limitText: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
+  },
+  benefitsSection: {
+    gap: 12,
+  },
+  benefitsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+    marginBottom: 8,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  benefitIcon: {
+    fontSize: 20,
+    color: Colors.primary,
+    marginRight: 12,
+    fontWeight: '700',
+  },
+  benefitText: {
+    fontSize: 16,
+    color: Colors.textPrimary,
+  },
+  upgradeActions: {
+    padding: 24,
+    paddingTop: 0,
+    gap: 12,
+  },
+  upgradeButton: {
+    backgroundColor: Colors.primary,
+    padding: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  upgradeButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  cancelUpgradeButton: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  cancelUpgradeText: {
+    color: Colors.textSecondary,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
