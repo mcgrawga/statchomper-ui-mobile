@@ -71,6 +71,26 @@ export default function App() {
     }
   }, [connected]);
 
+  useEffect(() => {
+    const restoreAndAck = async () => {
+      try {
+        const purchases = await getAvailablePurchases();
+        for (const p of purchases) {
+          if (p.productId === PRODUCT_ID && !p.isAcknowledgedAndroid) {
+            console.log('Acknowledging purchase:', p.transactionId);
+            await finishTransaction({ purchase: p, isConsumable: false });
+            updateProStatus(true); // unlock Pro after ACK
+          }
+        }
+      } catch (error) {
+        console.error('Error restoring purchases:', error);
+      }
+    };
+
+    // Call it on app start
+    restoreAndAck();
+  }, [finishTransaction]);
+
   // Handle purchase completion
   useEffect(() => {
     const handlePurchase = async () => {
@@ -95,7 +115,7 @@ export default function App() {
     };
 
     handlePurchase();
-  }, [currentPurchase]);
+  }, [currentPurchase, finishTransaction]);
 
 
   // Auto-restore purchases on startup
