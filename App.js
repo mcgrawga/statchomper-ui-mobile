@@ -12,7 +12,7 @@ import Colors from './constants/Colors';
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
-let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} });
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getAvailablePurchases: () => {} });
 if (!isExpoGo) {
   try {
     useIAP = require('react-native-iap').useIAP;
@@ -33,7 +33,7 @@ export default function App() {
     getProducts,
     currentPurchase,
     finishTransaction,
-    getPurchaseHistory,
+    getAvailablePurchases,
   } = useIAP();
 
   useEffect(() => {
@@ -97,21 +97,21 @@ export default function App() {
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
-      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getPurchaseHistory:', !!getPurchaseHistory);
-      if (connected && getPurchaseHistory) {
+      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases);
+      if (connected && getAvailablePurchases) {
         try {
-          console.log('[AUTO-RESTORE] Checking purchase history for existing purchases...');
-          const purchaseHistory = await getPurchaseHistory();
-          console.log('[AUTO-RESTORE] Purchase history:', JSON.stringify(purchaseHistory));
+          console.log('[AUTO-RESTORE] Checking for existing purchases...');
+          const availablePurchases = await getAvailablePurchases();
+          console.log('[AUTO-RESTORE] Available purchases:', JSON.stringify(availablePurchases));
           
-          const proPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
+          const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
           
           if (proPurchase) {
-            console.log('[AUTO-RESTORE] Pro purchase found in history, updating database...');
+            console.log('[AUTO-RESTORE] Pro purchase found, updating database...');
             updateProStatus(true);
             console.log('[AUTO-RESTORE] Pro version restored and database updated');
           } else {
-            console.log('[AUTO-RESTORE] No pro purchase found in history');
+            console.log('[AUTO-RESTORE] No pro purchase found');
           }
         } catch (error) {
           console.error('[AUTO-RESTORE] Error restoring purchases:', error);
@@ -119,7 +119,9 @@ export default function App() {
       }
     };
 
-    restorePurchases();
+    setTimeout(() => {
+      restorePurchases();
+    }, 1500);
   }, [connected]);
 
   if (!isDbReady) {

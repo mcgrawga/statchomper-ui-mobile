@@ -38,14 +38,6 @@ let useIAP = ({ onPurchaseSuccess, onPurchaseError } = {}) => ({
   finishTransaction: async () => {
     console.log('[Expo Go] Simulating finish transaction');
   },
-  getAvailablePurchases: async () => {
-    console.log('[Expo Go] Simulating get available purchases');
-    return [];
-  },
-  getPurchaseHistory: async () => {
-    console.log('[Expo Go] Simulating get purchase history');
-    return [];
-  },
 });
 
 if (!isExpoGo) {
@@ -81,7 +73,7 @@ export default function EditGameScreen({ navigation, route }) {
   const expectingPurchaseRef = useRef(false);
   
   // IAP hook with callbacks for purchase handling
-  const { requestPurchase, finishTransaction } = useIAP({
+  const { requestPurchase, finishTransaction, getAvailablePurchases } = useIAP({
     onPurchaseSuccess: async (purchase) => {
       console.log('Purchase success callback:', purchase);
       if (purchase?.productId === PRODUCT_ID && expectingPurchaseRef.current) {
@@ -195,14 +187,38 @@ export default function EditGameScreen({ navigation, route }) {
     return Math.round((made / attempts) * 100) + '%';
   };
 
-  const handlePlayerSelect = (selectedPlayer) => {
+  const handlePlayerSelect = async (selectedPlayer) => {
     if (selectedPlayer === ADD_NEW_PLAYER) {
       // Check if user can add new player
       const isPro = checkProStatus();
       const playerCount = players.length;
       
       if (playerCount >= 3 && !isPro) {
-        // Show upgrade modal
+        // Check Google Play for existing purchase before showing upgrade modal
+        console.log('[PLAYER-SELECT] Checking for existing purchase...');
+        try {
+          if (getAvailablePurchases) {
+            const availablePurchases = await getAvailablePurchases();
+            console.log('[PLAYER-SELECT] Available purchases:', JSON.stringify(availablePurchases));
+            const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
+            
+            if (proPurchase) {
+              // User owns pro version, update database and continue
+              console.log('[PLAYER-SELECT] Pro purchase found, updating database...');
+              updateProStatus(true);
+              setPlayer(selectedPlayer);
+              setShowPlayerPicker(false);
+              setTimeout(() => {
+                newPlayerNameRef.current?.focus();
+              }, 100);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('[PLAYER-SELECT] Error checking purchases:', error);
+        }
+        
+        // No purchase found, show upgrade modal
         setShowPlayerPicker(false);
         setShowUpgradeModal(true);
       } else {
