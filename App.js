@@ -12,7 +12,7 @@ import Colors from './constants/Colors';
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
-let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {}, getAvailablePurchases: () => {} });
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getPurchaseHistory: () => {} });
 if (!isExpoGo) {
   try {
     useIAP = require('react-native-iap').useIAP;
@@ -34,7 +34,6 @@ export default function App() {
     currentPurchase,
     finishTransaction,
     getPurchaseHistory,
-    getAvailablePurchases,
   } = useIAP();
 
   useEffect(() => {
@@ -98,37 +97,21 @@ export default function App() {
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
-      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases);
-      if (connected && getAvailablePurchases && getPurchaseHistory) {
+      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getPurchaseHistory:', !!getPurchaseHistory);
+      if (connected && getPurchaseHistory) {
         try {
-          console.log('[AUTO-RESTORE] Checking Google Play for existing purchases...');
-          const availablePurchases = await getAvailablePurchases();
-          console.log('[AUTO-RESTORE] Available purchases:', JSON.stringify(availablePurchases));
-          const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
+          console.log('[AUTO-RESTORE] Checking purchase history for existing purchases...');
+          const purchaseHistory = await getPurchaseHistory();
+          console.log('[AUTO-RESTORE] Purchase history:', JSON.stringify(purchaseHistory));
+          
+          const proPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
           
           if (proPurchase) {
-            console.log('[AUTO-RESTORE] Pro purchase found on Google Play, updating database...');
+            console.log('[AUTO-RESTORE] Pro purchase found in history, updating database...');
             updateProStatus(true);
             console.log('[AUTO-RESTORE] Pro version restored and database updated');
           } else {
-            console.log('[AUTO-RESTORE] No pro purchase found in getAvailablePurchases, trying getPurchaseHistory...');
-            
-            // Fallback to getPurchaseHistory as it's more reliable
-            try {
-              const purchaseHistory = await getPurchaseHistory();
-              console.log('[AUTO-RESTORE] Purchase history:', JSON.stringify(purchaseHistory));
-              const historyPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
-              
-              if (historyPurchase) {
-                console.log('[AUTO-RESTORE] Pro purchase found in history, updating database...');
-                updateProStatus(true);
-                console.log('[AUTO-RESTORE] Pro version restored from history and database updated');
-              } else {
-                console.log('[AUTO-RESTORE] No pro purchase found in history either');
-              }
-            } catch (historyError) {
-              console.error('[AUTO-RESTORE] Error checking purchase history:', historyError);
-            }
+            console.log('[AUTO-RESTORE] No pro purchase found in history');
           }
         } catch (error) {
           console.error('[AUTO-RESTORE] Error restoring purchases:', error);
