@@ -74,25 +74,29 @@ export default function App() {
   // Handle purchase completion
   useEffect(() => {
     const handlePurchase = async () => {
-      if (currentPurchase?.productId === PRODUCT_ID && finishTransaction) {
-        try {
-          console.log('Processing purchase:', currentPurchase);
-          
-          // Update pro status in database
-          updateProStatus(true);
-          
-          // Finish the transaction
-          await finishTransaction({ purchase: currentPurchase, isConsumable: false });
-          
-          console.log('Pro version activated successfully');
-        } catch (error) {
-          console.error('Error processing purchase:', error);
-        }
+      if (currentPurchase?.productId !== PRODUCT_ID) return;
+
+      try {
+        console.log('Processing purchase:', currentPurchase);
+
+        // 🔴 CRITICAL: acknowledge FIRST
+        await finishTransaction({
+          purchase: currentPurchase,
+          isConsumable: false,
+        });
+
+        // ✅ only after ACK succeeds
+        updateProStatus(true);
+
+        console.log('Pro version activated successfully');
+      } catch (error) {
+        console.error('Error processing purchase:', error);
       }
     };
 
     handlePurchase();
   }, [currentPurchase]);
+
 
   // Auto-restore purchases on startup
   useEffect(() => {
