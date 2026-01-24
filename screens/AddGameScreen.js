@@ -42,6 +42,10 @@ let useIAP = ({ onPurchaseSuccess, onPurchaseError } = {}) => ({
     console.log('[Expo Go] Simulating get available purchases');
     return [];
   },
+  getPurchaseHistory: async () => {
+    console.log('[Expo Go] Simulating get purchase history');
+    return [];
+  },
 });
 
 if (!isExpoGo) {
@@ -75,7 +79,7 @@ export default function AddGameScreen({ navigation }) {
   const expectingPurchaseRef = useRef(false);
   
   // IAP hook with callbacks for purchase handling
-  const { requestPurchase, finishTransaction, getAvailablePurchases } = useIAP({
+  const { requestPurchase, finishTransaction, getAvailablePurchases, getPurchaseHistory } = useIAP({
     onPurchaseSuccess: async (purchase) => {
       console.log('Purchase success callback:', purchase);
       if (purchase?.productId === PRODUCT_ID && expectingPurchaseRef.current) {
@@ -264,24 +268,59 @@ export default function AddGameScreen({ navigation }) {
         errorMessage.includes('already own') || 
         error.code === 'E_ALREADY_OWNED'
       ) {
-        // User already owns this - grant pro status and proceed
-        console.log('[PURCHASE] Item already owned, granting pro status...');
-        updateProStatus(true);
-        setShowUpgradeModal(false);
-        setIsPurchasing(false);
-        expectingPurchaseRef.current = false;
-        setPlayer(ADD_NEW_PLAYER);
+        // User already owns this - verify with purchase history then grant pro status
+        console.log('[PURCHASE] Item already owned, verifying with purchase history...');
         
-        Alert.alert('Restored!', 'Your Pro purchase has been restored.', [
-          {
-            text: 'OK',
-            onPress: () => {
-              setTimeout(() => {
-                newPlayerNameRef.current?.focus();
-              }, 100);
+        try {
+          // Double-check with getPurchaseHistory as it's more reliable than getAvailablePurchases
+          const purchaseHistory = await getPurchaseHistory();
+          console.log('[PURCHASE] Purchase history:', JSON.stringify(purchaseHistory));
+          
+          const ownsProduct = purchaseHistory.some(p => p.productId === PRODUCT_ID);
+          
+          if (ownsProduct) {
+            console.log('[PURCHASE] Ownership confirmed via purchase history');
+          } else {
+            console.log('[PURCHASE] No matching purchase in history, trusting Google error message');
+          }
+          
+          // Grant pro status (trust Google's "already owned" response)
+          updateProStatus(true);
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          setPlayer(ADD_NEW_PLAYER);
+          
+          Alert.alert('Restored!', 'Your Pro purchase has been restored.', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
             },
-          },
-        ]);
+          ]);
+        } catch (historyError) {
+          console.error('[PURCHASE] Error checking purchase history:', historyError);
+          // Still grant pro status since Google said they already own it
+          updateProStatus(true);
+          setShowUpgradeModal(false);
+          setIsPurchasing(false);
+          expectingPurchaseRef.current = false;
+          setPlayer(ADD_NEW_PLAYER);
+          
+          Alert.alert('Restored!', 'Your Pro purchase has been restored.', [
+            {
+              text: 'OK',
+              onPress: () => {
+                setTimeout(() => {
+                  newPlayerNameRef.current?.focus();
+                }, 100);
+              },
+            },
+          ]);
+        }
       } else {
         Alert.alert('Purchase Failed', error.message || 'Unable to complete purchase. Please try again.');
         setIsPurchasing(false);

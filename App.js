@@ -99,7 +99,7 @@ export default function App() {
   useEffect(() => {
     const restorePurchases = async () => {
       console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases);
-      if (connected && getAvailablePurchases) {
+      if (connected && getAvailablePurchases && getPurchaseHistory) {
         try {
           console.log('[AUTO-RESTORE] Checking Google Play for existing purchases...');
           const availablePurchases = await getAvailablePurchases();
@@ -111,7 +111,24 @@ export default function App() {
             updateProStatus(true);
             console.log('[AUTO-RESTORE] Pro version restored and database updated');
           } else {
-            console.log('[AUTO-RESTORE] No pro purchase found');
+            console.log('[AUTO-RESTORE] No pro purchase found in getAvailablePurchases, trying getPurchaseHistory...');
+            
+            // Fallback to getPurchaseHistory as it's more reliable
+            try {
+              const purchaseHistory = await getPurchaseHistory();
+              console.log('[AUTO-RESTORE] Purchase history:', JSON.stringify(purchaseHistory));
+              const historyPurchase = purchaseHistory?.find(p => p.productId === PRODUCT_ID);
+              
+              if (historyPurchase) {
+                console.log('[AUTO-RESTORE] Pro purchase found in history, updating database...');
+                updateProStatus(true);
+                console.log('[AUTO-RESTORE] Pro version restored from history and database updated');
+              } else {
+                console.log('[AUTO-RESTORE] No pro purchase found in history either');
+              }
+            } catch (historyError) {
+              console.error('[AUTO-RESTORE] Error checking purchase history:', historyError);
+            }
           }
         } catch (error) {
           console.error('[AUTO-RESTORE] Error restoring purchases:', error);
