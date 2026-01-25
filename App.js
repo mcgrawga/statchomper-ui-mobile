@@ -12,7 +12,8 @@ import Colors from './constants/Colors';
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
-let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getAvailablePurchases: () => {} });
+console.log('isExpoGo:', isExpoGo, 'appOwnership:', Constants.appOwnership);
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getAvailablePurchases: () => {}, getPurchaseHistory: () => {} });
 if (!isExpoGo) {
   try {
     useIAP = require('react-native-iap').useIAP;
@@ -34,6 +35,7 @@ export default function App() {
     currentPurchase,
     finishTransaction,
     getAvailablePurchases,
+    getPurchaseHistory,
   } = useIAP();
 
   useEffect(() => {
@@ -59,37 +61,26 @@ export default function App() {
     setupDatabase();
   }, []);
 
-  // Load products when IAP connection is ready
-  useEffect(() => {
-    if (connected && getProducts) {
-      try {
-        console.log('IAP connected, loading products...');
-        getProducts([PRODUCT_ID]);
-      } catch (error) {
-        console.error('Error loading products:', error);
-      }
-    }
-  }, [connected]);
+  // Just trying this to fix restore issues
+  // useEffect(() => {
+  //   const restoreAndAck = async () => {
+  //     try {
+  //       const purchases = await getAvailablePurchases();
+  //       for (const p of purchases) {
+  //         if (p.productId === PRODUCT_ID && !p.isAcknowledgedAndroid) {
+  //           console.log('Acknowledging purchase:', p.transactionId);
+  //           await finishTransaction({ purchase: p, isConsumable: false });
+  //           updateProStatus(true); // unlock Pro after ACK
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error('Error restoring purchases:', error);
+  //     }
+  //   };
 
-  useEffect(() => {
-    const restoreAndAck = async () => {
-      try {
-        const purchases = await getAvailablePurchases();
-        for (const p of purchases) {
-          if (p.productId === PRODUCT_ID && !p.isAcknowledgedAndroid) {
-            console.log('Acknowledging purchase:', p.transactionId);
-            await finishTransaction({ purchase: p, isConsumable: false });
-            updateProStatus(true); // unlock Pro after ACK
-          }
-        }
-      } catch (error) {
-        console.error('Error restoring purchases:', error);
-      }
-    };
-
-    // Call it on app start
-    restoreAndAck();
-  }, [finishTransaction]);
+  //   // Call it on app start
+  //   restoreAndAck();
+  // }, [finishTransaction]);
 
   // Handle purchase completion
   useEffect(() => {
@@ -121,12 +112,33 @@ export default function App() {
   // Auto-restore purchases on startup
   useEffect(() => {
     const restorePurchases = async () => {
-      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases);
-      if (connected && getAvailablePurchases) {
+      console.log('[AUTO-RESTORE] Connected:', connected, 'Has getAvailablePurchases:', !!getAvailablePurchases, 'Has getPurchaseHistory:', !!getPurchaseHistory);
+      if (connected && (getAvailablePurchases || getPurchaseHistory)) {
         try {
           console.log('[AUTO-RESTORE] Checking for existing purchases...');
-          const availablePurchases = await getAvailablePurchases();
-          console.log('[AUTO-RESTORE] Available purchases:', JSON.stringify(availablePurchases));
+          
+          // Try getAvailablePurchases first
+          let availablePurchases = null;
+          try {
+            console.log('[AUTO-RESTORE] Calling getAvailablePurchases...');
+            availablePurchases = await getAvailablePurchases();
+            console.log('[AUTO-RESTORE] getAvailablePurchases result:', availablePurchases);
+            console.log('[AUTO-RESTORE] Available purchases:', JSON.stringify(availablePurchases));
+          } catch (error) {
+            console.log('[AUTO-RESTORE] getAvailablePurchases failed:', error);
+          }
+          
+          // If getAvailablePurchases returned nothing or failed, try getPurchaseHistory
+          if (!availablePurchases || availablePurchases.length === 0) {
+            console.log('[AUTO-RESTORE] Trying getPurchaseHistory as fallback...');
+            try {
+              const purchaseHistory = await getPurchaseHistory();
+              console.log('[AUTO-RESTORE] Purchase history:', JSON.stringify(purchaseHistory));
+              availablePurchases = purchaseHistory;
+            } catch (error) {
+              console.log('[AUTO-RESTORE] getPurchaseHistory failed:', error);
+            }
+          }
           
           const proPurchase = availablePurchases?.find(p => p.productId === PRODUCT_ID);
           
