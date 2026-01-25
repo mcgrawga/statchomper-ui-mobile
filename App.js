@@ -13,10 +13,15 @@ import Colors from './constants/Colors';
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
 console.log('isExpoGo:', isExpoGo, 'appOwnership:', Constants.appOwnership);
-let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {}, getAvailablePurchases: () => {}, getPurchaseHistory: () => {} });
+let useIAP = () => ({ connected: false, products: [], getProducts: () => {}, currentPurchase: null, finishTransaction: () => {} });
+let getAvailablePurchases = () => Promise.resolve([]);
+let getPurchaseHistory = () => Promise.resolve([]);
 if (!isExpoGo) {
   try {
-    useIAP = require('react-native-iap').useIAP;
+    const IAP = require('react-native-iap');
+    useIAP = IAP.useIAP;
+    getAvailablePurchases = IAP.getAvailablePurchases;
+    getPurchaseHistory = IAP.getPurchaseHistory;
   } catch (e) {
     console.log('IAP not available:', e.message);
   }
@@ -34,8 +39,6 @@ export default function App() {
     getProducts,
     currentPurchase,
     finishTransaction,
-    getAvailablePurchases,
-    getPurchaseHistory,
   } = useIAP();
 
   useEffect(() => {
