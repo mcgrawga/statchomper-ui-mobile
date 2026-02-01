@@ -1,123 +1,126 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
-import Colors from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function PrivacyPolicyScreen({ navigation }) {
+  const { colors } = useTheme();
+  const dynamicStyles = getStyles(colors);
+  
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView style={dynamicStyles.container}>
+      <View style={dynamicStyles.header}>
         <TouchableOpacity 
-          style={styles.backButton}
+          style={dynamicStyles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={dynamicStyles.backButtonText}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Privacy Policy</Text>
-        <View style={styles.backButton} />
+        <Text style={dynamicStyles.headerTitle}>Privacy Policy</Text>
+        <View style={dynamicStyles.backButton} />
       </View>
       
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.title}>Privacy Policy for HoopTrack</Text>
-        <Text style={styles.lastUpdated}>Last updated: January 18, 2026</Text>
+      <ScrollView style={dynamicStyles.content} contentContainerStyle={dynamicStyles.contentContainer}>
+        <Text style={dynamicStyles.title}>Privacy Policy for HoopTrack</Text>
+        <Text style={dynamicStyles.lastUpdated}>Last updated: January 18, 2026</Text>
         
-        <Text style={styles.sectionTitle}>Introduction</Text>
-        <Text style={styles.paragraph}>
+        <Text style={dynamicStyles.sectionTitle}>Introduction</Text>
+        <Text style={dynamicStyles.paragraph}>
           HoopTrack ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how our mobile application collects, uses, and safeguards your information.
         </Text>
         
-        <Text style={styles.sectionTitle}>Information We Collect</Text>
-        <Text style={styles.paragraph}>
-          HoopTrack stores basketball game statistics and player information <Text style={styles.bold}>locally on your device only</Text>. We do not collect, transmit, or store any personal information on external servers.
+        <Text style={dynamicStyles.sectionTitle}>Information We Collect</Text>
+        <Text style={dynamicStyles.paragraph}>
+          HoopTrack stores basketball game statistics and player information <Text style={dynamicStyles.bold}>locally on your device only</Text>. We do not collect, transmit, or store any personal information on external servers.
         </Text>
         
-        <Text style={styles.subsectionTitle}>Data Stored Locally:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• Player names (first names only, as you choose to enter them)</Text>
-          <Text style={styles.bulletItem}>• Game statistics (shots made/missed, points, dates)</Text>
-          <Text style={styles.bulletItem}>• Your Pro version purchase status (managed by Google Play)</Text>
+        <Text style={dynamicStyles.subsectionTitle}>Data Stored Locally:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>• Player names (first names only, as you choose to enter them)</Text>
+          <Text style={dynamicStyles.bulletItem}>• Game statistics (shots made/missed, points, dates)</Text>
+          <Text style={dynamicStyles.bulletItem}>• Your Pro version purchase status (managed by Google Play)</Text>
         </View>
         
-        <Text style={styles.sectionTitle}>How We Use Your Information</Text>
-        <Text style={styles.paragraph}>All data is stored locally on your device to:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• Display your game statistics and player performance</Text>
-          <Text style={styles.bulletItem}>• Track shooting percentages and improvement over time</Text>
-          <Text style={styles.bulletItem}>• Provide personalized insights based on your recorded games</Text>
+        <Text style={dynamicStyles.sectionTitle}>How We Use Your Information</Text>
+        <Text style={dynamicStyles.paragraph}>All data is stored locally on your device to:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>• Display your game statistics and player performance</Text>
+          <Text style={dynamicStyles.bulletItem}>• Track shooting percentages and improvement over time</Text>
+          <Text style={dynamicStyles.bulletItem}>• Provide personalized insights based on your recorded games</Text>
         </View>
         
-        <Text style={styles.sectionTitle}>Data Storage and Security</Text>
-        <Text style={styles.paragraph}>All game data is stored in a local SQLite database on your device. This data:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• Remains on your device and is not transmitted to any servers</Text>
-          <Text style={styles.bulletItem}>• Is protected by your device's security measures</Text>
-          <Text style={styles.bulletItem}>• Will be deleted if you uninstall the app</Text>
+        <Text style={dynamicStyles.sectionTitle}>Data Storage and Security</Text>
+        <Text style={dynamicStyles.paragraph}>All game data is stored in a local SQLite database on your device. This data:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>• Remains on your device and is not transmitted to any servers</Text>
+          <Text style={dynamicStyles.bulletItem}>• Is protected by your device's security measures</Text>
+          <Text style={dynamicStyles.bulletItem}>• Will be deleted if you uninstall the app</Text>
         </View>
         
-        <Text style={styles.sectionTitle}>In-App Purchases</Text>
-        <Text style={styles.paragraph}>
+        <Text style={dynamicStyles.sectionTitle}>In-App Purchases</Text>
+        <Text style={dynamicStyles.paragraph}>
           HoopTrack offers a Pro version as a one-time in-app purchase. All payment processing is handled securely by Google Play. We do not have access to your payment information. Purchase records are managed by Google Play according to their privacy policy.
         </Text>
         
-        <Text style={styles.sectionTitle}>Third-Party Services</Text>
-        <Text style={styles.paragraph}>HoopTrack uses the following third-party services:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>
-            <Text style={styles.bold}>Google Play Billing:</Text> For processing in-app purchases. Subject to Google's Privacy Policy
+        <Text style={dynamicStyles.sectionTitle}>Third-Party Services</Text>
+        <Text style={dynamicStyles.paragraph}>HoopTrack uses the following third-party services:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>
+            <Text style={dynamicStyles.bold}>Google Play Billing:</Text> For processing in-app purchases. Subject to Google's Privacy Policy
           </Text>
-          <Text style={styles.bulletItem}>
-            <Text style={styles.bold}>Expo/React Native:</Text> Development framework. No data is sent to Expo servers in production builds
+          <Text style={dynamicStyles.bulletItem}>
+            <Text style={dynamicStyles.bold}>Expo/React Native:</Text> Development framework. No data is sent to Expo servers in production builds
           </Text>
         </View>
         
-        <Text style={styles.sectionTitle}>Children's Privacy</Text>
-        <Text style={styles.paragraph}>
+        <Text style={dynamicStyles.sectionTitle}>Children's Privacy</Text>
+        <Text style={dynamicStyles.paragraph}>
           HoopTrack is safe for users of all ages. We do not knowingly collect personal information from anyone. All data remains local to the device.
         </Text>
         
-        <Text style={styles.sectionTitle}>Data Deletion</Text>
-        <Text style={styles.paragraph}>You can delete your data at any time by:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• Deleting individual players or games within the app</Text>
-          <Text style={styles.bulletItem}>• Uninstalling the app, which removes all local data</Text>
+        <Text style={dynamicStyles.sectionTitle}>Data Deletion</Text>
+        <Text style={dynamicStyles.paragraph}>You can delete your data at any time by:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>• Deleting individual players or games within the app</Text>
+          <Text style={dynamicStyles.bulletItem}>• Uninstalling the app, which removes all local data</Text>
         </View>
         
-        <Text style={styles.sectionTitle}>Changes to This Privacy Policy</Text>
-        <Text style={styles.paragraph}>
+        <Text style={dynamicStyles.sectionTitle}>Changes to This Privacy Policy</Text>
+        <Text style={dynamicStyles.paragraph}>
           We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated "Last updated" date.
         </Text>
         
-        <Text style={styles.sectionTitle}>Contact Us</Text>
-        <Text style={styles.paragraph}>If you have questions about this Privacy Policy, please contact us at:</Text>
-        <Text style={styles.paragraph}>
+        <Text style={dynamicStyles.sectionTitle}>Contact Us</Text>
+        <Text style={dynamicStyles.paragraph}>If you have questions about this Privacy Policy, please contact us at:</Text>
+        <Text style={dynamicStyles.paragraph}>
           Email: support@hooptrackapp.com
         </Text>
         
-        <Text style={styles.sectionTitle}>Your Rights</Text>
-        <Text style={styles.paragraph}>Since all data is stored locally on your device:</Text>
-        <View style={styles.bulletList}>
-          <Text style={styles.bulletItem}>• You have complete control over your data</Text>
-          <Text style={styles.bulletItem}>• You can export or delete data at any time</Text>
-          <Text style={styles.bulletItem}>• No data is shared with third parties</Text>
-          <Text style={styles.bulletItem}>• No data is used for advertising or analytics</Text>
+        <Text style={dynamicStyles.sectionTitle}>Your Rights</Text>
+        <Text style={dynamicStyles.paragraph}>Since all data is stored locally on your device:</Text>
+        <View style={dynamicStyles.bulletList}>
+          <Text style={dynamicStyles.bulletItem}>• You have complete control over your data</Text>
+          <Text style={dynamicStyles.bulletItem}>• You can export or delete data at any time</Text>
+          <Text style={dynamicStyles.bulletItem}>• No data is shared with third parties</Text>
+          <Text style={dynamicStyles.bulletItem}>• No data is used for advertising or analytics</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -147,38 +150,38 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   lastUpdated: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontStyle: 'italic',
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.primaryDark,
+    color: colors.primaryDark,
     marginTop: 24,
     marginBottom: 12,
   },
   subsectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   paragraph: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 24,
     marginBottom: 16,
   },
   bold: {
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   bulletList: {
     marginLeft: 16,
@@ -186,7 +189,7 @@ const styles = StyleSheet.create({
   },
   bulletItem: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 24,
     marginBottom: 8,
   },

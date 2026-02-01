@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, TextInput, PanResponder, Modal, Pressable } from 'react-native';
 import GameCard from './GameCard';
-import Colors from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function PlayerCard({ player, games, isExpanded, onToggle, onEditGame, onDeleteGame, onDeletePlayer }) {
+  const { colors } = useTheme();
   const [chevronRotation] = useState(new Animated.Value(0));
   const [contentHeight] = useState(new Animated.Value(0));
   const [filterText, setFilterText] = useState('');
@@ -146,9 +147,11 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
     return formattedDate.includes(searchText) || opponent.includes(searchText);
   });
 
+  const dynamicStyles = getStyles(colors);
+  
   return (
     <Animated.View style={[
-      styles.outerContainer,
+      dynamicStyles.outerContainer,
       {
         marginBottom: marginAnim,
       },
@@ -159,47 +162,47 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
           transform: [{ scale: scaleAnim }],
         },
       ]}>
-        <View style={styles.container}>
+        <View style={dynamicStyles.container}>
           {/* Action Buttons Behind */}
-          <View style={styles.actionButtons}>
+          <View style={dynamicStyles.actionButtons}>
             <TouchableOpacity 
-              style={styles.cancelButton}
+              style={dynamicStyles.cancelButton}
               onPress={handleCancel}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={dynamicStyles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              style={styles.deleteButton}
+              style={dynamicStyles.deleteButton}
               onPress={handleDeletePress}
             >
-              <Text style={styles.deleteButtonText}>Delete</Text>
+              <Text style={dynamicStyles.deleteButtonText}>Delete</Text>
             </TouchableOpacity>
           </View>
         
         {/* Swipeable Content */}
         <Animated.View 
           style={[
-            styles.swipeableContent,
+            dynamicStyles.swipeableContent,
             { transform: [{ translateX: swipeAnim }] }
           ]}
           {...panResponder.panHandlers}
         >
           {/* Player Header Button */}
           <TouchableOpacity 
-            style={styles.headerButton}
+            style={dynamicStyles.headerButton}
             onPress={onToggle}
             activeOpacity={0.7}
             disabled={isSwipedOpen}
           >
-        <View style={styles.headerLeft}>
-          <Text style={styles.playerName}>{player}</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{games.length}</Text>
+        <View style={dynamicStyles.headerLeft}>
+          <Text style={dynamicStyles.playerName}>{player}</Text>
+          <View style={dynamicStyles.badge}>
+            <Text style={dynamicStyles.badgeText}>{games.length}</Text>
           </View>
         </View>
         <Animated.Text 
           style={[
-            styles.chevron,
+            dynamicStyles.chevron,
             { transform: [{ rotate: chevronRotate }] }
           ]}
         >
@@ -209,7 +212,7 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
 
       {/* Expanded Games List */}
       <Animated.View style={[
-        styles.gamesContainer,
+        dynamicStyles.gamesContainer,
         {
           maxHeight: contentHeight.interpolate({
             inputRange: [0, 1],
@@ -224,18 +227,18 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
       ]}>
         <View>
           {/* Filter Input */}
-          <View style={styles.filterContainer}>
-            <Text style={styles.searchIcon}>🔍</Text>
+          <View style={dynamicStyles.filterContainer}>
+            <Text style={dynamicStyles.searchIcon}>🔍</Text>
             <TextInput
-              style={styles.filterInput}
+              style={dynamicStyles.filterInput}
               placeholder="Filter by date or opponent..."
-              placeholderTextColor={Colors.textSecondary}
+              placeholderTextColor={colors.textSecondary}
               value={filterText}
               onChangeText={setFilterText}
             />
             {filterText.length > 0 && (
               <TouchableOpacity onPress={() => setFilterText('')}>
-                <Text style={styles.clearIcon}>✕</Text>
+                <Text style={dynamicStyles.clearIcon}>✕</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -253,10 +256,10 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
               ))}
             </View>
           ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>🏀</Text>
-              <Text style={styles.emptyText}>No games found</Text>
-              <Text style={styles.emptySubtext}>Try adjusting your filter</Text>
+            <View style={dynamicStyles.emptyState}>
+              <Text style={dynamicStyles.emptyIcon}>🏀</Text>
+              <Text style={dynamicStyles.emptyText}>No games found</Text>
+              <Text style={dynamicStyles.emptySubtext}>Try adjusting your filter</Text>
             </View>
           )}
         </View>
@@ -271,26 +274,26 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
         animationType="fade"
         onRequestClose={() => setShowDeleteModal(false)}
       >
-        <View style={styles.confirmOverlay}>
-          <View style={styles.confirmDialog}>
-            <Text style={styles.confirmTitle}>Delete {player}?</Text>
-            <Text style={styles.confirmMessage}>
+        <View style={dynamicStyles.confirmOverlay}>
+          <View style={dynamicStyles.confirmDialog}>
+            <Text style={dynamicStyles.confirmTitle}>Delete {player}?</Text>
+            <Text style={dynamicStyles.confirmMessage}>
               This will permanently delete {player} and all {games.length} {games.length === 1 ? 'game' : 'games'}. This action cannot be undone.
             </Text>
             
-            <View style={styles.confirmButtons}>
+            <View style={dynamicStyles.confirmButtons}>
               <TouchableOpacity 
-                style={styles.modalCancelButton}
+                style={dynamicStyles.modalCancelButton}
                 onPress={() => setShowDeleteModal(false)}
               >
-                <Text style={styles.modalCancelButtonText}>Cancel</Text>
+                <Text style={dynamicStyles.modalCancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={styles.modalDeleteButton}
+                style={dynamicStyles.modalDeleteButton}
                 onPress={handleConfirmDelete}
               >
-                <Text style={styles.modalDeleteButtonText}>Delete</Text>
+                <Text style={dynamicStyles.modalDeleteButtonText}>Delete</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -301,7 +304,7 @@ export default function PlayerCard({ player, games, isExpanded, onToggle, onEdit
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   outerContainer: {
     overflow: 'hidden',
   },
@@ -343,16 +346,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   swipeableContent: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   headerButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     padding: 16,
     borderRadius: 12,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -367,7 +370,7 @@ const styles = StyleSheet.create({
   playerName: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   headerRight: {
     flexDirection: 'row',
@@ -375,7 +378,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   badge: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.border,
     borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -390,7 +393,7 @@ const styles = StyleSheet.create({
   chevron: {
     fontSize: 36,
     fontWeight: '700',
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 36,
   },
   gamesContainer: {
@@ -400,13 +403,13 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: Colors.borderColor,
+    borderColor: colors.border,
   },
   searchIcon: {
     fontSize: 16,
@@ -415,12 +418,12 @@ const styles = StyleSheet.create({
   filterInput: {
     flex: 1,
     fontSize: 14,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     padding: 0,
   },
   clearIcon: {
     fontSize: 18,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '600',
     paddingHorizontal: 4,
   },
@@ -436,12 +439,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   emptySubtext: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   confirmOverlay: {
     flex: 1,
@@ -450,7 +453,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmDialog: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -459,12 +462,12 @@ const styles = StyleSheet.create({
   confirmTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   confirmMessage: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 24,
     lineHeight: 22,
   },
@@ -474,15 +477,15 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
   },
   modalCancelButtonText: {
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontSize: 16,
     fontWeight: '600',
   },

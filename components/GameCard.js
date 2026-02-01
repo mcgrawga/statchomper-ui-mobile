@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable, Animated } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import Colors from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function GameCard({ game, onEdit, onDelete }) {
+  const { colors } = useTheme();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const marginAnim = useRef(new Animated.Value(12)).current;
@@ -49,6 +50,8 @@ export default function GameCard({ game, onEdit, onDelete }) {
     return `${value.toFixed(1)}%`;
   };
 
+  const dynamicStyles = getStyles(colors);
+  
   return (
     <Animated.View style={[
       {
@@ -62,40 +65,43 @@ export default function GameCard({ game, onEdit, onDelete }) {
           transform: [{ scale: scaleAnim }],
         },
       ]}>
-        <View style={styles.card}>
+        <View style={dynamicStyles.card}>
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.playerName}>{game.player}</Text>
-          <Text style={styles.date}>{formatDate(game.datePlayed)}</Text>
-          <Text style={styles.opponent}>vs. {game.opponent}</Text>
+      <View style={dynamicStyles.header}>
+        <View style={dynamicStyles.headerLeft}>
+          <Text style={dynamicStyles.playerName}>{game.player}</Text>
+          <Text style={dynamicStyles.date}>{formatDate(game.datePlayed)}</Text>
+          <Text style={dynamicStyles.opponent}>vs. {game.opponent}</Text>
         </View>
-        <MenuButton game={game} onEdit={onEdit} onDelete={handleDelete} />
+        <MenuButton game={game} onEdit={onEdit} onDelete={handleDelete} styles={dynamicStyles} />
       </View>
 
       {/* Stats */}
-      <View style={styles.statsContainer}>
+      <View style={dynamicStyles.statsContainer}>
         {/* All Stats */}
-        <View style={styles.statsGrid}>
-          <StatItem label="Points" value={game.boxScore.points} />
-          <StatItem label="Rebounds" value={game.boxScore.rebounds} />
-          <StatItem label="Assists" value={game.boxScore.assists} />
-          <StatItem label="Blocks" value={game.boxScore.blocks} />
-          <StatItem label="Fouls" value={game.boxScore.fouls} />
-          <StatItem label="Steals" value={game.boxScore.steals} />
-          <StatItem label="Turnovers" value={game.boxScore.turnovers} />
+        <View style={dynamicStyles.statsGrid}>
+          <StatItem label="Points" value={game.boxScore.points} styles={dynamicStyles} />
+          <StatItem label="Rebounds" value={game.boxScore.rebounds} styles={dynamicStyles} />
+          <StatItem label="Assists" value={game.boxScore.assists} styles={dynamicStyles} />
+          <StatItem label="Blocks" value={game.boxScore.blocks} styles={dynamicStyles} />
+          <StatItem label="Fouls" value={game.boxScore.fouls} styles={dynamicStyles} />
+          <StatItem label="Steals" value={game.boxScore.steals} styles={dynamicStyles} />
+          <StatItem label="Turnovers" value={game.boxScore.turnovers} styles={dynamicStyles} />
           
           <StatItem 
             label="2-Pointers"
             value={`${game.boxScore.twoPointMade}/${game.boxScore.twoPointAttempts}${!isNaN(game.boxScore.twoPointPercentage) ? ` (${Math.round(game.boxScore.twoPointPercentage)}%)` : ''}`}
+            styles={dynamicStyles}
           />
           <StatItem 
             label="3-Pointers"
             value={`${game.boxScore.threePointMade}/${game.boxScore.threePointAttempts}${!isNaN(game.boxScore.threePointPercentage) ? ` (${Math.round(game.boxScore.threePointPercentage)}%)` : ''}`}
+            styles={dynamicStyles}
           />
           <StatItem 
             label="Free Throws"
             value={`${game.boxScore.freeThrowMade}/${game.boxScore.freeThrowAttempts}${!isNaN(game.boxScore.freeThrowPercentage) ? ` (${Math.round(game.boxScore.freeThrowPercentage)}%)` : ''}`}
+            styles={dynamicStyles}
           />
         </View>
       </View>
@@ -106,7 +112,7 @@ export default function GameCard({ game, onEdit, onDelete }) {
 }
 
 // Compact stat item for grid layout
-function StatItem({ label, value }) {
+function StatItem({ label, value, styles }) {
   return (
     <View style={styles.statItem}>
       <Text style={styles.statItemLabel}>{label}</Text>
@@ -116,7 +122,7 @@ function StatItem({ label, value }) {
 }
 
 // Menu button component
-function MenuButton({ game, onEdit, onDelete }) {
+function MenuButton({ game, onEdit, onDelete, styles }) {
   const [menuVisible, setMenuVisible] = useState(false);
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const [buttonLayout, setButtonLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -227,12 +233,12 @@ function MenuButton({ game, onEdit, onDelete }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   card: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     marginBottom: 12,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -244,8 +250,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-    backgroundColor: Colors.primary,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.primary,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
@@ -289,7 +295,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: 'absolute',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 8,
     minWidth: 150,
     shadowColor: '#000',
@@ -310,14 +316,14 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: colors.textPrimary,
   },
   deleteText: {
     color: '#d32f2f',
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.border,
   },
   confirmOverlay: {
     flex: 1,
@@ -327,7 +333,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   confirmDialog: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 24,
     width: '100%',
@@ -401,18 +407,18 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.background,
   },
   statItemLabel: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   statItemValue: {
     fontSize: 12,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     fontWeight: '700',
   },
 });

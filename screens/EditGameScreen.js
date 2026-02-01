@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Constants from 'expo-constants';
-import Colors from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 import { getPlayers, updateGame } from '../services/database';
 import { checkProStatus, PRODUCT_ID, updateProStatus } from '../services/purchases';
 
@@ -49,6 +49,7 @@ if (!isExpoGo) {
 }
 
 export default function EditGameScreen({ navigation, route }) {
+  const { colors } = useTheme();
   const { game } = route.params;
 
   // Form state - Initialize with game data
@@ -404,78 +405,80 @@ export default function EditGameScreen({ navigation, route }) {
     }
   };
 
+  const dynamicStyles = getStyles(colors);
+  
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+    <SafeAreaView style={dynamicStyles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       
       {/* Success Toast */}
       {showToast && (
         <Animated.View 
           style={[
-            styles.toast,
+            dynamicStyles.toast,
             { transform: [{ translateY: toastAnim }] }
           ]}
         >
-          <Text style={styles.toastIcon}>✓</Text>
-          <Text style={styles.toastText}>Game saved successfully!</Text>
+          <Text style={dynamicStyles.toastIcon}>✓</Text>
+          <Text style={dynamicStyles.toastText}>Game saved successfully!</Text>
         </Animated.View>
       )}
       
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={styles.backButtonText}>←</Text>
+      <View style={dynamicStyles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={dynamicStyles.backButton}>
+          <Text style={dynamicStyles.backButtonText}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Game</Text>
-        <View style={styles.headerSpacer} />
+        <Text style={dynamicStyles.headerTitle}>Edit Game</Text>
+        <View style={dynamicStyles.headerSpacer} />
       </View>
 
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={dynamicStyles.keyboardView}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
         <ScrollView 
-          style={styles.scrollView} 
-          contentContainerStyle={styles.scrollContent}
+          style={dynamicStyles.scrollView} 
+          contentContainerStyle={dynamicStyles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
         {/* Player & Game Info */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Game Information</Text>
+        <View style={dynamicStyles.card}>
+          <Text style={dynamicStyles.sectionTitle}>Game Information</Text>
           
-          <Text style={styles.label}>Player Name *</Text>
+          <Text style={dynamicStyles.label}>Player Name *</Text>
           <TouchableOpacity
-            style={styles.dropdownButton}
+            style={dynamicStyles.dropdownButton}
             onPress={() => setShowPlayerPicker(true)}
           >
-            <Text style={[styles.dropdownButtonText, !player && styles.dropdownPlaceholder]}>
+            <Text style={[dynamicStyles.dropdownButtonText, !player && dynamicStyles.dropdownPlaceholder]}>
               {player || 'Select player'}
             </Text>
-            <Text style={styles.dropdownIcon}>▼</Text>
+            <Text style={dynamicStyles.dropdownIcon}>▼</Text>
           </TouchableOpacity>
 
           {player === ADD_NEW_PLAYER && (
             <>
-              <Text style={styles.label}>New Player Name *</Text>
+              <Text style={dynamicStyles.label}>New Player Name *</Text>
               <TextInput
                 ref={newPlayerNameRef}
-                style={styles.input}
+                style={dynamicStyles.input}
                 value={newPlayerName}
                 onChangeText={setNewPlayerName}
                 placeholder="Enter new player name"
-                placeholderTextColor={Colors.textLight}
+                placeholderTextColor={colors.textLight}
               />
             </>
           )}
 
-          <Text style={styles.label}>Date *</Text>
+          <Text style={dynamicStyles.label}>Date *</Text>
           <TouchableOpacity
-            style={styles.dateButton}
+            style={dynamicStyles.dateButton}
             onPress={() => setShowDatePicker(true)}
           >
-            <Text style={styles.dateButtonText}>{formatDate(date)}</Text>
-            <Text style={styles.dateIcon}>📅</Text>
+            <Text style={dynamicStyles.dateButtonText}>{formatDate(date)}</Text>
+            <Text style={dynamicStyles.dateIcon}>📅</Text>
           </TouchableOpacity>
 
           {showDatePicker && (
@@ -488,190 +491,190 @@ export default function EditGameScreen({ navigation, route }) {
             />
           )}
 
-          <Text style={styles.label}>Opponent *</Text>
+          <Text style={dynamicStyles.label}>Opponent *</Text>
           <TextInput
-            style={styles.input}
+            style={dynamicStyles.input}
             value={opponent}
             onChangeText={setOpponent}
             placeholder="Enter opponent name"
-            placeholderTextColor={Colors.textLight}
+            placeholderTextColor={colors.textLight}
           />
         </View>
 
         {/* Shooting Stats */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Shooting Statistics</Text>
+        <View style={dynamicStyles.card}>
+          <Text style={dynamicStyles.sectionTitle}>Shooting Statistics</Text>
           
           {/* Free Throws */}
-          <View style={styles.statGroup}>
-            <Text style={styles.statLabel}>Free Throws</Text>
-            <View style={styles.shootingInputRow}>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Made</Text>
+          <View style={dynamicStyles.statGroup}>
+            <Text style={dynamicStyles.statLabel}>Free Throws</Text>
+            <View style={dynamicStyles.shootingInputRow}>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Made</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(freeThrowMade)}
                   onChangeText={(text) => setFreeThrowMade(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Attempts</Text>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Attempts</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(freeThrowAttempts)}
                   onChangeText={(text) => setFreeThrowAttempts(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
             </View>
-            <View style={styles.quickEntryRow}>
+            <View style={dynamicStyles.quickEntryRow}>
               <TouchableOpacity 
-                style={[styles.button, styles.makeButton]}
+                style={[dynamicStyles.button, dynamicStyles.makeButton]}
                 onPress={() => handleMake('ft')}
               >
-                <Text style={styles.buttonText}>+ Make</Text>
+                <Text style={dynamicStyles.buttonText}>+ Make</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.button, styles.missButton]}
+                style={[dynamicStyles.button, dynamicStyles.missButton]}
                 onPress={() => handleMiss('ft')}
               >
-                <Text style={styles.buttonText}>- Miss</Text>
+                <Text style={dynamicStyles.buttonText}>- Miss</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* 2-Pointers */}
-          <View style={styles.statGroup}>
-            <Text style={styles.statLabel}>2-Pointers</Text>
-            <View style={styles.shootingInputRow}>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Made</Text>
+          <View style={dynamicStyles.statGroup}>
+            <Text style={dynamicStyles.statLabel}>2-Pointers</Text>
+            <View style={dynamicStyles.shootingInputRow}>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Made</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(twoPointMade)}
                   onChangeText={(text) => setTwoPointMade(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Attempts</Text>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Attempts</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(twoPointAttempts)}
                   onChangeText={(text) => setTwoPointAttempts(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
             </View>
-            <View style={styles.quickEntryRow}>
+            <View style={dynamicStyles.quickEntryRow}>
               <TouchableOpacity 
-                style={[styles.button, styles.makeButton]}
+                style={[dynamicStyles.button, dynamicStyles.makeButton]}
                 onPress={() => handleMake('2pt')}
               >
-                <Text style={styles.buttonText}>+ Make</Text>
+                <Text style={dynamicStyles.buttonText}>+ Make</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.button, styles.missButton]}
+                style={[dynamicStyles.button, dynamicStyles.missButton]}
                 onPress={() => handleMiss('2pt')}
               >
-                <Text style={styles.buttonText}>- Miss</Text>
+                <Text style={dynamicStyles.buttonText}>- Miss</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* 3-Pointers */}
-          <View style={styles.statGroup}>
-            <Text style={styles.statLabel}>3-Pointers</Text>
-            <View style={styles.shootingInputRow}>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Made</Text>
+          <View style={dynamicStyles.statGroup}>
+            <Text style={dynamicStyles.statLabel}>3-Pointers</Text>
+            <View style={dynamicStyles.shootingInputRow}>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Made</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(threePointMade)}
                   onChangeText={(text) => setThreePointMade(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
-              <View style={styles.shootingInputGroup}>
-                <Text style={styles.shootingInputLabel}>Attempts</Text>
+              <View style={dynamicStyles.shootingInputGroup}>
+                <Text style={dynamicStyles.shootingInputLabel}>Attempts</Text>
                 <TextInput
-                  style={styles.shootingInput}
+                  style={dynamicStyles.shootingInput}
                   value={String(threePointAttempts)}
                   onChangeText={(text) => setThreePointAttempts(parseInt(text) || 0)}
                   keyboardType="numeric"
                 />
               </View>
             </View>
-            <View style={styles.quickEntryRow}>
+            <View style={dynamicStyles.quickEntryRow}>
               <TouchableOpacity 
-                style={[styles.button, styles.makeButton]}
+                style={[dynamicStyles.button, dynamicStyles.makeButton]}
                 onPress={() => handleMake('3pt')}
               >
-                <Text style={styles.buttonText}>+ Make</Text>
+                <Text style={dynamicStyles.buttonText}>+ Make</Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                style={[styles.button, styles.missButton]}
+                style={[dynamicStyles.button, dynamicStyles.missButton]}
                 onPress={() => handleMiss('3pt')}
               >
-                <Text style={styles.buttonText}>- Miss</Text>
+                <Text style={dynamicStyles.buttonText}>- Miss</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Points Summary */}
-          <View style={styles.pointsSummary}>
-            <Text style={styles.pointsLabel}>Total Points</Text>
-            <Text style={styles.pointsValue}>{calculatePoints()}</Text>
+          <View style={dynamicStyles.pointsSummary}>
+            <Text style={dynamicStyles.pointsLabel}>Total Points</Text>
+            <Text style={dynamicStyles.pointsValue}>{calculatePoints()}</Text>
           </View>
         </View>
 
         {/* Other Stats */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Game Statistics</Text>
+        <View style={dynamicStyles.card}>
+          <Text style={dynamicStyles.sectionTitle}>Game Statistics</Text>
           
-          <SimpleStat label="Rebounds" value={rebounds} onChange={setRebounds} onIncrement={() => handleIncrement(setRebounds, rebounds)} />
-          <SimpleStat label="Assists" value={assists} onChange={setAssists} onIncrement={() => handleIncrement(setAssists, assists)} />
-          <SimpleStat label="Steals" value={steals} onChange={setSteals} onIncrement={() => handleIncrement(setSteals, steals)} />
-          <SimpleStat label="Blocks" value={blocks} onChange={setBlocks} onIncrement={() => handleIncrement(setBlocks, blocks)} />
-          <SimpleStat label="Turnovers" value={turnovers} onChange={setTurnovers} onIncrement={() => handleIncrement(setTurnovers, turnovers)} />
-          <SimpleStat label="Fouls" value={fouls} onChange={setFouls} onIncrement={() => handleIncrement(setFouls, fouls)} />
+          <SimpleStat label="Rebounds" value={rebounds} onChange={setRebounds} onIncrement={() => handleIncrement(setRebounds, rebounds)} styles={dynamicStyles} />
+          <SimpleStat label="Assists" value={assists} onChange={setAssists} onIncrement={() => handleIncrement(setAssists, assists)} styles={dynamicStyles} />
+          <SimpleStat label="Steals" value={steals} onChange={setSteals} onIncrement={() => handleIncrement(setSteals, steals)} styles={dynamicStyles} />
+          <SimpleStat label="Blocks" value={blocks} onChange={setBlocks} onIncrement={() => handleIncrement(setBlocks, blocks)} styles={dynamicStyles} />
+          <SimpleStat label="Turnovers" value={turnovers} onChange={setTurnovers} onIncrement={() => handleIncrement(setTurnovers, turnovers)} styles={dynamicStyles} />
+          <SimpleStat label="Fouls" value={fouls} onChange={setFouls} onIncrement={() => handleIncrement(setFouls, fouls)} styles={dynamicStyles} />
         </View>
 
         {/* Shooting Summary */}
-        <View style={styles.card}>
-          <Text style={styles.shootingSummaryTitle}>Shooting Summary</Text>
+        <View style={dynamicStyles.card}>
+          <Text style={dynamicStyles.shootingSummaryTitle}>Shooting Summary</Text>
           
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>POINTS SCORED</Text>
-            <Text style={styles.summaryCardValue}>{calculatePoints()}</Text>
+          <View style={dynamicStyles.summaryCard}>
+            <Text style={dynamicStyles.summaryCardLabel}>POINTS SCORED</Text>
+            <Text style={dynamicStyles.summaryCardValue}>{calculatePoints()}</Text>
           </View>
 
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>2-POINTERS</Text>
-            <Text style={styles.summaryCardValue}>
+          <View style={dynamicStyles.summaryCard}>
+            <Text style={dynamicStyles.summaryCardLabel}>2-POINTERS</Text>
+            <Text style={dynamicStyles.summaryCardValue}>
               {twoPointMade} for {twoPointAttempts}, {calculatePercentage(twoPointMade, twoPointAttempts)}
             </Text>
           </View>
 
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>3-POINTERS</Text>
-            <Text style={styles.summaryCardValue}>
+          <View style={dynamicStyles.summaryCard}>
+            <Text style={dynamicStyles.summaryCardLabel}>3-POINTERS</Text>
+            <Text style={dynamicStyles.summaryCardValue}>
               {threePointMade} for {threePointAttempts}, {calculatePercentage(threePointMade, threePointAttempts)}
             </Text>
           </View>
 
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryCardLabel}>FREE THROWS</Text>
-            <Text style={styles.summaryCardValue}>
+          <View style={dynamicStyles.summaryCard}>
+            <Text style={dynamicStyles.summaryCardLabel}>FREE THROWS</Text>
+            <Text style={dynamicStyles.summaryCardValue}>
               {freeThrowMade} for {freeThrowAttempts}, {calculatePercentage(freeThrowMade, freeThrowAttempts)}
             </Text>
           </View>
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Save Game</Text>
+        <TouchableOpacity style={dynamicStyles.submitButton} onPress={handleSubmit}>
+          <Text style={dynamicStyles.submitButtonText}>Save Game</Text>
         </TouchableOpacity>
       </ScrollView>
       </KeyboardAvoidingView>
@@ -683,15 +686,15 @@ export default function EditGameScreen({ navigation, route }) {
         animationType="slide"
         onRequestClose={() => setShowPlayerPicker(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Player</Text>
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.modalContent}>
+            <View style={dynamicStyles.modalHeader}>
+              <Text style={dynamicStyles.modalTitle}>Select Player</Text>
               <TouchableOpacity
                 onPress={() => setShowPlayerPicker(false)}
-                style={styles.modalCloseButton}
+                style={dynamicStyles.modalCloseButton}
               >
-                <Text style={styles.modalCloseText}>✕</Text>
+                <Text style={dynamicStyles.modalCloseText}>✕</Text>
               </TouchableOpacity>
             </View>
             <FlatList
@@ -699,12 +702,12 @@ export default function EditGameScreen({ navigation, route }) {
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.playerOption}
+                  style={dynamicStyles.playerOption}
                   onPress={() => handlePlayerSelect(item)}
                 >
-                  <Text style={styles.playerOptionText}>{item}</Text>
+                  <Text style={dynamicStyles.playerOptionText}>{item}</Text>
                   {player === item && (
-                    <Text style={styles.playerOptionCheck}>✓</Text>
+                    <Text style={dynamicStyles.playerOptionCheck}>✓</Text>
                   )}
                 </TouchableOpacity>
               )}
@@ -720,51 +723,51 @@ export default function EditGameScreen({ navigation, route }) {
         animationType="fade"
         onRequestClose={() => setShowUpgradeModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.upgradeModalContent}>
-            <View style={styles.upgradeHeader}>
-              <Text style={styles.upgradeTitle}>Upgrade to Pro</Text>
-              <Text style={styles.upgradePrice}>$6.99</Text>
+        <View style={dynamicStyles.modalOverlay}>
+          <View style={dynamicStyles.upgradeModalContent}>
+            <View style={dynamicStyles.upgradeHeader}>
+              <Text style={dynamicStyles.upgradeTitle}>Upgrade to Pro</Text>
+              <Text style={dynamicStyles.upgradePrice}>$6.99</Text>
             </View>
             
-            <View style={styles.upgradeBody}>
-              <View style={styles.limitMessage}>
-                <Text style={styles.limitIcon}>🏀</Text>
-                <Text style={styles.limitText}>
+            <View style={dynamicStyles.upgradeBody}>
+              <View style={dynamicStyles.limitMessage}>
+                <Text style={dynamicStyles.limitIcon}>🏀</Text>
+                <Text style={dynamicStyles.limitText}>
                   Free version is limited to 3 players
                 </Text>
               </View>
               
-              <View style={styles.benefitsSection}>
-                <Text style={styles.benefitsTitle}>Pro Benefits:</Text>
-                <View style={styles.benefitItem}>
-                  <Text style={styles.benefitIcon}>✓</Text>
-                  <Text style={styles.benefitText}>Unlimited players</Text>
+              <View style={dynamicStyles.benefitsSection}>
+                <Text style={dynamicStyles.benefitsTitle}>Pro Benefits:</Text>
+                <View style={dynamicStyles.benefitItem}>
+                  <Text style={dynamicStyles.benefitIcon}>✓</Text>
+                  <Text style={dynamicStyles.benefitText}>Unlimited players</Text>
                 </View>
-                <View style={styles.benefitItem}>
-                  <Text style={styles.benefitIcon}>✓</Text>
-                  <Text style={styles.benefitText}>One-time purchase</Text>
+                <View style={dynamicStyles.benefitItem}>
+                  <Text style={dynamicStyles.benefitIcon}>✓</Text>
+                  <Text style={dynamicStyles.benefitText}>One-time purchase</Text>
                 </View>
               </View>
             </View>
             
-            <View style={styles.upgradeActions}>
+            <View style={dynamicStyles.upgradeActions}>
               <TouchableOpacity
-                style={styles.upgradeButton}
+                style={dynamicStyles.upgradeButton}
                 onPress={handleUpgrade}
                 disabled={isPurchasing}
               >
-                <Text style={styles.upgradeButtonText}>
+                <Text style={dynamicStyles.upgradeButtonText}>
                   {isPurchasing ? 'Processing...' : 'Upgrade Now'}
                 </Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={styles.cancelUpgradeButton}
+                style={dynamicStyles.cancelUpgradeButton}
                 onPress={() => setShowUpgradeModal(false)}
                 disabled={isPurchasing}
               >
-                <Text style={styles.cancelUpgradeText}>Maybe Later</Text>
+                <Text style={dynamicStyles.cancelUpgradeText}>Maybe Later</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -775,7 +778,7 @@ export default function EditGameScreen({ navigation, route }) {
 }
 
 // Simple stat component with input and + button
-function SimpleStat({ label, value, onChange, onIncrement }) {
+function SimpleStat({ label, value, onChange, onIncrement, styles }) {
   return (
     <View style={styles.simpleStatRow}>
       <Text style={styles.statLabel}>{label}</Text>
@@ -797,19 +800,19 @@ function SimpleStat({ label, value, onChange, onIncrement }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingVertical: 16,
     paddingHorizontal: 16,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -842,11 +845,11 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   card: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -855,29 +858,29 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 8,
     marginTop: 8,
   },
   input: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   dropdownButton: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -887,19 +890,19 @@ const styles = StyleSheet.create({
   },
   dropdownButtonText: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   dropdownPlaceholder: {
-    color: Colors.textLight,
+    color: colors.textLight,
   },
   dropdownIcon: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   dateButton: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
@@ -909,7 +912,7 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   dateIcon: {
     fontSize: 18,
@@ -921,7 +924,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: '70%',
@@ -933,19 +936,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   modalCloseButton: {
     padding: 4,
   },
   modalCloseText: {
     fontSize: 24,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontWeight: '300',
   },
   playerOption: {
@@ -954,15 +957,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
   playerOptionText: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   playerOptionCheck: {
     fontSize: 20,
-    color: Colors.success,
+    color: colors.success,
     fontWeight: '700',
   },
   statGroup: {
@@ -971,7 +974,7 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   shootingInputRow: {
@@ -985,17 +988,17 @@ const styles = StyleSheet.create({
   shootingInputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     marginBottom: 6,
   },
   shootingInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     textAlign: 'center',
   },
   quickEntryRow: {
@@ -1010,13 +1013,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   makeButton: {
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
   },
   missButton: {
-    backgroundColor: Colors.error,
+    backgroundColor: colors.error,
   },
   incrementButton: {
-    backgroundColor: Colors.success,
+    backgroundColor: colors.success,
     flex: 0,
     paddingHorizontal: 24,
   },
@@ -1027,14 +1030,14 @@ const styles = StyleSheet.create({
   },
   statSummary: {
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
   },
   pointsSummary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     padding: 16,
     borderRadius: 8,
     marginTop: 8,
@@ -1052,11 +1055,11 @@ const styles = StyleSheet.create({
   shootingSummaryTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.primary,
+    color: colors.primary,
     marginBottom: 16,
   },
   summaryCard: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderRadius: 8,
     padding: 20,
     marginBottom: 12,
@@ -1065,14 +1068,14 @@ const styles = StyleSheet.create({
   summaryCardLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     letterSpacing: 0.5,
     marginBottom: 8,
   },
   summaryCardValue: {
     fontSize: 42,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   simpleStatRow: {
     flexDirection: 'row',
@@ -1080,7 +1083,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: colors.border,
   },
   simpleStatControl: {
     flexDirection: 'row',
@@ -1088,24 +1091,24 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   simpleStatInput: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 10,
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     textAlign: 'center',
     minWidth: 60,
   },
   submitButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 32,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -1147,18 +1150,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   upgradeModalContent: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 16,
     width: '85%',
     maxWidth: 400,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 8,
   },
   upgradeHeader: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     padding: 24,
@@ -1181,7 +1184,7 @@ const styles = StyleSheet.create({
   limitMessage: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     padding: 16,
     borderRadius: 12,
     marginBottom: 24,
@@ -1193,7 +1196,7 @@ const styles = StyleSheet.create({
   limitText: {
     flex: 1,
     fontSize: 14,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   benefitsSection: {
@@ -1202,7 +1205,7 @@ const styles = StyleSheet.create({
   benefitsTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   benefitItem: {
@@ -1211,13 +1214,13 @@ const styles = StyleSheet.create({
   },
   benefitIcon: {
     fontSize: 20,
-    color: Colors.primary,
+    color: colors.primary,
     marginRight: 12,
     fontWeight: '700',
   },
   benefitText: {
     fontSize: 16,
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   upgradeActions: {
     padding: 24,
@@ -1225,11 +1228,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   upgradeButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 12,
     alignItems: 'center',
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -1245,7 +1248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelUpgradeText: {
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     fontSize: 16,
     fontWeight: '600',
   },

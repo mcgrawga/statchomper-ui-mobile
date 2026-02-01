@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Constants from 'expo-constants';
@@ -9,7 +9,7 @@ import EditGameScreen from './screens/EditGameScreen';
 import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import { initDatabase } from './services/database';
 import { PRODUCT_ID, updateProStatus } from './services/purchases';
-import Colors from './constants/Colors';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 
 // Only import useIAP if not in Expo Go
 const isExpoGo = Constants.appOwnership === 'expo';
@@ -30,8 +30,9 @@ if (!isExpoGo) {
 
 const Stack = createNativeStackNavigator();
 
-export default function App() {
+function AppContent() {
   const [isDbReady, setIsDbReady] = useState(false);
+  const { colors, isDarkMode } = useTheme();
   
   // Initialize IAP with useIAP hook
   const {
@@ -166,24 +167,38 @@ export default function App() {
 
   if (!isDbReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background }}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="AddGame" component={AddGameScreen} />
-        <Stack.Screen name="EditGame" component={EditGameScreen} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <StatusBar 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        backgroundColor={colors.primary} 
+      />
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="AddGame" component={AddGameScreen} />
+          <Stack.Screen name="EditGame" component={EditGameScreen} />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

@@ -14,9 +14,10 @@ import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import PlayerCard from '../components/PlayerCard';
 import { getAllGames, deleteGame, deletePlayerGames } from '../services/database';
-import Colors from '../constants/Colors';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function HomeScreen({ navigation, route }) {
+  const { colors, isDarkMode, toggleDarkMode } = useTheme();
   // Track which player is currently expanded (only one at a time)
   const [expandedPlayer, setExpandedPlayer] = useState(null);
   const [shouldScrollToPlayer, setShouldScrollToPlayer] = useState(false);
@@ -24,7 +25,6 @@ export default function HomeScreen({ navigation, route }) {
   const [games, setGames] = useState([]);
   const lastExpandParam = useRef(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   // Load games from database
   const loadGames = () => {
@@ -167,23 +167,23 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   const handleToggleDarkMode = (value) => {
-    setDarkMode(value);
-    // TODO: Implement dark mode theme switching
-    // This would involve updating the Colors constant or using a theme context
+    toggleDarkMode(value);
   };
 
+  const dynamicStyles = getStyles(colors);
+  
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+    <SafeAreaView style={dynamicStyles.container}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
       
       {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTitleContainer}>
-          <Text style={styles.headerIcon}>🏀</Text>
-          <Text style={styles.headerTitle}>HoopTrack</Text>
+      <View style={dynamicStyles.header}>
+        <View style={dynamicStyles.headerTitleContainer}>
+          <Text style={dynamicStyles.headerIcon}>🏀</Text>
+          <Text style={dynamicStyles.headerTitle}>HoopTrack</Text>
         </View>
         <TouchableOpacity 
-          style={styles.menuButton}
+          style={dynamicStyles.menuButton}
           onPress={() => setShowMenu(true)}
           activeOpacity={0.7}
         >
@@ -192,21 +192,21 @@ export default function HomeScreen({ navigation, route }) {
       </View>
 
       {/* Page Heading */}
-      <View style={styles.pageHeadingContainer}>
-        <Text style={styles.pageHeading}>Players</Text>
-        <Text style={styles.pageSubheading}>
+      <View style={dynamicStyles.pageHeadingContainer}>
+        <Text style={dynamicStyles.pageHeading}>Players</Text>
+        <Text style={dynamicStyles.pageSubheading}>
           {playerData.length} {playerData.length === 1 ? 'player' : 'players'}
         </Text>
       </View>
 
       {/* Empty State */}
       {playerData.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateTitle}>No Games Yet</Text>
-          <Text style={styles.emptyStateText}>
+        <View style={dynamicStyles.emptyState}>
+          <Text style={dynamicStyles.emptyStateTitle}>No Games Yet</Text>
+          <Text style={dynamicStyles.emptyStateText}>
             Tap the + button below to add your first game
           </Text>
-          <Text style={styles.emptyStateIcon}>👇</Text>
+          <Text style={dynamicStyles.emptyStateIcon}>👇</Text>
         </View>
       ) : (
         /* Player List */
@@ -226,7 +226,7 @@ export default function HomeScreen({ navigation, route }) {
               onDeletePlayer={handleDeletePlayer}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={dynamicStyles.listContent}
           showsVerticalScrollIndicator={false}
           maintainVisibleContentPosition={{
             minIndexForVisible: 0,
@@ -242,14 +242,14 @@ export default function HomeScreen({ navigation, route }) {
 
       {/* Floating Action Button */}
       <TouchableOpacity 
-        style={styles.fab}
+        style={dynamicStyles.fab}
         onPress={() => {
           setExpandedPlayer(null);
           navigation.setParams({ expandPlayer: undefined });
           navigation.navigate('AddGame');
         }}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Text style={dynamicStyles.fabText}>+</Text>
       </TouchableOpacity>
 
       {/* Menu Modal */}
@@ -260,32 +260,32 @@ export default function HomeScreen({ navigation, route }) {
         onRequestClose={() => setShowMenu(false)}
       >
         <TouchableOpacity 
-          style={styles.menuOverlay}
+          style={dynamicStyles.menuOverlay}
           activeOpacity={1}
           onPress={() => setShowMenu(false)}
         >
-          <View style={styles.menuContainer}>
+          <View style={dynamicStyles.menuContainer}>
             <TouchableOpacity 
-              style={styles.menuItem}
+              style={dynamicStyles.menuItem}
               onPress={() => {
                 setShowMenu(false);
                 handleOpenPrivacyPolicy();
               }}
             >
-              <Feather name="lock" size={18} color={Colors.textSecondary} />
-              <Text style={styles.menuItemText}>Privacy Policy</Text>
+              <Feather name="lock" size={18} color={colors.textSecondary} />
+              <Text style={dynamicStyles.menuItemText}>Privacy Policy</Text>
             </TouchableOpacity>
             
-            <View style={styles.menuDivider} />
+            <View style={dynamicStyles.menuDivider} />
             
-            <View style={styles.menuItem}>
-              <Feather name="moon" size={18} color={Colors.textSecondary} />
-              <Text style={styles.menuItemText}>Dark Mode</Text>
+            <View style={dynamicStyles.menuItem}>
+              <Feather name="moon" size={18} color={colors.textSecondary} />
+              <Text style={dynamicStyles.menuItemText}>Dark Mode</Text>
               <Switch
-                value={darkMode}
+                value={isDarkMode}
                 onValueChange={handleToggleDarkMode}
-                trackColor={{ false: Colors.border, true: Colors.primary }}
-                thumbColor={darkMode ? '#ffffff' : '#f4f3f4'}
+                trackColor={{ false: colors.border, true: colors.primary }}
+                thumbColor={isDarkMode ? '#ffffff' : '#f4f3f4'}
               />
             </View>
           </View>
@@ -295,18 +295,18 @@ export default function HomeScreen({ navigation, route }) {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     paddingTop: 32,
     paddingBottom: 20,
     paddingLeft: 20,
     paddingRight: 4,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -346,11 +346,11 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   menuContainer: {
-    backgroundColor: Colors.cardBackground,
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     paddingVertical: 8,
     minWidth: 200,
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -367,14 +367,14 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: colors.border,
   },
   pageHeadingContainer: {
-    backgroundColor: Colors.background,
+    backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 12,
@@ -385,12 +385,12 @@ const styles = StyleSheet.create({
   pageHeading: {
     fontSize: 28,
     fontWeight: '700',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
   },
   pageSubheading: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
   },
   listContent: {
     padding: 16,
@@ -405,12 +405,12 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: Colors.textPrimary,
+    color: colors.textPrimary,
     marginBottom: 12,
   },
   emptyStateText: {
     fontSize: 16,
-    color: Colors.textSecondary,
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -425,10 +425,10 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: Colors.primary,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.shadowColor,
+    shadowColor: colors.shadowColor,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

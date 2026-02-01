@@ -54,6 +54,9 @@ export const initDatabase = () => {
       console.log('Default settings initialized');
     }
     
+    // Migrate darkMode column if it doesn't exist
+    migrateDarkModeColumn();
+    
     console.log('Database initialized successfully');
     return true;
   } catch (error) {
@@ -313,6 +316,57 @@ export const setProStatus = (isPro) => {
     return true;
   } catch (error) {
     console.error('Error setting pro status:', error);
+    return false;
+  }
+};
+
+// Migrate darkMode column - safe for existing users
+const migrateDarkModeColumn = () => {
+  try {
+    const database = getDb();
+    
+    // Check if darkMode column exists using PRAGMA table_info
+    const tableInfo = database.getAllSync('PRAGMA table_info(settings)');
+    const hasDarkModeColumn = tableInfo.some(column => column.name === 'darkMode');
+    
+    if (!hasDarkModeColumn) {
+      // Add darkMode column with default value of 0 (light mode)
+      database.runSync('ALTER TABLE settings ADD COLUMN darkMode INTEGER DEFAULT 0');
+      console.log('darkMode column added to settings table');
+      
+      // Set default value for existing row
+      database.runSync('UPDATE settings SET darkMode = 0 WHERE id = 1');
+    }
+  } catch (error) {
+    console.error('Error migrating darkMode column:', error);
+    // Don't throw - allow app to continue even if migration fails
+  }
+};
+
+// Get dark mode preference
+export const getDarkMode = () => {
+  try {
+    const database = getDb();
+    const result = database.getFirstSync('SELECT darkMode FROM settings WHERE id = 1');
+    return result ? result.darkMode === 1 : false;
+  } catch (error) {
+    console.error('Error getting dark mode:', error);
+    return false;
+  }
+};
+
+// Set dark mode preference
+export const setDarkMode = (isDark) => {
+  try {
+    const database = getDb();
+    database.runSync(
+      'UPDATE settings SET darkMode = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = 1',
+      [isDark ? 1 : 0]
+    );
+    console.log('Dark mode updated to:', isDark);
+    return true;
+  } catch (error) {
+    console.error('Error setting dark mode:', error);
     return false;
   }
 };
