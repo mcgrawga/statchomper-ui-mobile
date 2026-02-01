@@ -7,8 +7,10 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
-  Alert
+  Modal,
+  Switch
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import PlayerCard from '../components/PlayerCard';
 import { getAllGames, deleteGame, deletePlayerGames } from '../services/database';
@@ -21,6 +23,8 @@ export default function HomeScreen({ navigation, route }) {
   const flatListRef = useRef(null);
   const [games, setGames] = useState([]);
   const lastExpandParam = useRef(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   // Load games from database
   const loadGames = () => {
@@ -157,13 +161,34 @@ export default function HomeScreen({ navigation, route }) {
     }
   };
 
+  const handleOpenPrivacyPolicy = () => {
+    setShowMenu(false);
+    navigation.navigate('PrivacyPolicy');
+  };
+
+  const handleToggleDarkMode = (value) => {
+    setDarkMode(value);
+    // TODO: Implement dark mode theme switching
+    // This would involve updating the Colors constant or using a theme context
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>🏀 HoopTrack</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerIcon}>🏀</Text>
+          <Text style={styles.headerTitle}>HoopTrack</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.menuButton}
+          onPress={() => setShowMenu(true)}
+          activeOpacity={0.7}
+        >
+          <Feather name="more-vertical" size={24} color="#ffffff" />
+        </TouchableOpacity>
       </View>
 
       {/* Page Heading */}
@@ -226,6 +251,46 @@ export default function HomeScreen({ navigation, route }) {
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
+
+      {/* Menu Modal */}
+      <Modal
+        transparent={true}
+        visible={showMenu}
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity 
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                handleOpenPrivacyPolicy();
+              }}
+            >
+              <Feather name="lock" size={18} color={Colors.textSecondary} />
+              <Text style={styles.menuItemText}>Privacy Policy</Text>
+            </TouchableOpacity>
+            
+            <View style={styles.menuDivider} />
+            
+            <View style={styles.menuItem}>
+              <Feather name="moon" size={18} color={Colors.textSecondary} />
+              <Text style={styles.menuItemText}>Dark Mode</Text>
+              <Switch
+                value={darkMode}
+                onValueChange={handleToggleDarkMode}
+                trackColor={{ false: Colors.border, true: Colors.primary }}
+                thumbColor={darkMode ? '#ffffff' : '#f4f3f4'}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -237,19 +302,76 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: Colors.primary,
-    paddingVertical: 32,
-    paddingHorizontal: 20,
+    paddingTop: 32,
+    paddingBottom: 20,
+    paddingLeft: 20,
+    paddingRight: 4,
     shadowColor: Colors.shadowColor,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flex: 1,
+  },
+  headerIcon: {
+    fontSize: 36,
   },
   headerTitle: {
     fontSize: 36,
     fontWeight: '700',
     color: '#ffffff',
-    textAlign: 'center',
+  },
+  menuButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 44,
+    height: 44,
+    marginLeft: 'auto',
+    paddingRight: 4,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 80,
+    paddingRight: 20,
+  },
+  menuContainer: {
+    backgroundColor: Colors.cardBackground,
+    borderRadius: 12,
+    paddingVertical: 8,
+    minWidth: 200,
+    shadowColor: Colors.shadowColor,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.textPrimary,
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#e0e0e0',
   },
   pageHeadingContainer: {
     backgroundColor: Colors.background,

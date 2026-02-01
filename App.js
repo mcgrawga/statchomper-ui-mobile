@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 import HomeScreen from './screens/HomeScreen';
 import AddGameScreen from './screens/AddGameScreen';
 import EditGameScreen from './screens/EditGameScreen';
+import PrivacyPolicyScreen from './screens/PrivacyPolicyScreen';
 import { initDatabase } from './services/database';
 import { PRODUCT_ID, updateProStatus } from './services/purchases';
 import Colors from './constants/Colors';
@@ -181,6 +182,7 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="AddGame" component={AddGameScreen} />
         <Stack.Screen name="EditGame" component={EditGameScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
